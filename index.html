@@ -1,0 +1,362 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOLYOUSEE — Vibe Coder</title>
+<meta name="description" content="LOLYOUSEE — портфолио vibe coder: проекты под ключ от концепции до запуска.">
+<script>
+document.documentElement.classList.add('js');
+setTimeout(() => {
+  if (!window.__APP_STARTED__) {
+    document.documentElement.classList.remove('js');
+    document.getElementById('preloader')?.classList.add('hide');
+  }
+}, 2500);
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap"></noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div class="pre-window">
+    <div class="pre-titlebar">
+      <div class="pre-dots">
+        <div class="pre-dot" style="background:#ff5f57"></div>
+        <div class="pre-dot" style="background:#ffbd2e"></div>
+        <div class="pre-dot" style="background:#28c941"></div>
+      </div>
+      <span>bash — lolyousee@portfolio: ~</span>
+      <span style="opacity:.3">⌘</span>
+    </div>
+    <div class="pre-body" id="preLines"></div>
+  </div>
+  <div class="pre-bar-wrap"><div class="pre-bar" id="preBar"></div></div>
+</div>
+
+<div id="progress-bar"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div class="grid-bg"></div>
+<div class="noise"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" id="navLogo" href="#home" data-text="LOLYOUSEE" aria-label="LOLYOUSEE">
+    <span id="navLogoTyped"></span>
+  </a>
+  <div class="nav-right">
+    <div class="nav-links-group">
+      <a class="nav-link" href="#about" data-i18n="nav-about">About</a>
+      <a class="nav-link" href="#stack" data-i18n="nav-stack">Stack</a>
+      <a class="nav-link" href="#projects" data-i18n="nav-projects">Projects</a>
+      <a class="nav-link" href="#contact" data-i18n="nav-contact">Contact</a>
+    </div>
+    <div class="nav-divider"></div>
+    <button class="lang-toggle" id="langToggle">EN</button>
+    <a class="nav-btn nav-btn-ghost" href="#projects" data-i18n="nav-btn-work">Проекты</a>
+    <a class="nav-btn nav-btn-primary" href="#contact" data-i18n="nav-btn-contact">Связаться</a>
+    <button class="burger" id="burger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-menu" id="mobileMenu">
+  <a class="nav-link" href="#about"    data-mob data-i18n="nav-about">About</a>
+  <a class="nav-link" href="#stack"    data-mob data-i18n="nav-stack">Stack</a>
+  <a class="nav-link" href="#projects" data-mob data-i18n="nav-projects">Projects</a>
+  <a class="nav-link" href="#contact"  data-mob data-i18n="nav-contact">Contact</a>
+  <a class="nav-btn nav-btn-primary"   href="#contact" data-mob data-i18n="nav-btn-contact">Связаться</a>
+  <div class="mobile-lang">
+    <span data-i18n="lang-label">Язык:</span>
+    <button class="lang-toggle" id="langToggleMob">EN</button>
+  </div>
+</div>
+
+<main>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="home">
+  <canvas id="particles-canvas"></canvas>
+  <p class="hero-tag" id="heroTag">Vibe Coder — Portfolio</p>
+  <div class="glitch-wrap" id="glitchWrap">
+    <h1 class="hero-name" data-text="LOLYOUSEE">LOLYOU<span class="see">SEE</span></h1>
+  </div>
+  <p class="hero-sub" data-i18n="hero-sub">Специализируюсь на вайбкодинге и создаю проекты «под ключ» — от концепции до запуска. Думаю как предприниматель, собираю как архитектор, реализую как инженер.</p>
+  <div class="hero-cta">
+    <a href="#projects" class="btn btn-primary" data-i18n="btn-projects">Смотреть проекты</a>
+    <a href="#contact"  class="btn btn-outline"  data-i18n="btn-contact">Связаться</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div><div class="stat-val">02</div><div data-i18n="stat-projects">проекта запущено</div></div><div class="stat-dot"></div></div>
+    <div class="stat"><div><div class="stat-val">100<span style="font-size:.9rem">%</span></div><div data-i18n="stat-prod">от идеи до прода</div></div><div class="stat-dot" style="animation-delay:.5s"></div></div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div><span data-i18n="scroll-hint">SCROLL</span></div>
+</section>
+
+<!-- ══ ABOUT ══ -->
+<section class="about" id="about">
+  <div class="reveal">
+    <p class="section-label" data-i18n="about-label">About</p>
+    <h2 class="section-title" data-i18n="about-title">КТО Я</h2>
+  </div>
+  <div class="about-grid">
+    <div class="reveal">
+      <p class="about-text" data-i18n="about-text">Результат — стильные, чистые и рабочие решения, ориентированные на рост бизнеса. <span style="color:var(--cyan)">Вайбкодинг — это не просто инструмент</span>, это новый способ мышления: когда скорость итерации важнее бюрократии, а качество результата говорит само за себя.</p>
+      <div class="skills-list" id="skillsList"></div>
+      <div class="counters-row" id="counters">
+        <div class="counter-item"><div class="counter-num" data-target="2"   data-suffix="">02</div><div class="counter-label" data-i18n="cnt-projects">Проекта</div></div>
+        <div class="counter-item"><div class="counter-num" data-target="100" data-suffix="%">0%</div><div class="counter-label" data-i18n="cnt-launch">До прода</div></div>
+        <div class="counter-item"><div class="counter-num" data-target="24"  data-suffix="ч">0ч</div><div class="counter-label" data-i18n="cnt-reply">Время ответа</div></div>
+      </div>
+    </div>
+    <div class="about-visual reveal-left">
+      <div class="hex-container">
+        <svg class="hex-svg" viewBox="0 0 280 280">
+          <defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00f5ff" stop-opacity=".6"/><stop offset="100%" stop-color="#ff00aa" stop-opacity=".6"/></linearGradient></defs>
+          <path d="M140 10 L265 77.5 L265 202.5 L140 270 L15 202.5 L15 77.5 Z" stroke="url(#hg)" stroke-width="1" fill="none" stroke-dasharray="8 4" opacity=".5"/>
+          <path d="M140 30 L250 92.5 L250 187.5 L140 250 L30 187.5 L30 92.5 Z" stroke="#00f5ff" stroke-width=".5" fill="none" opacity=".2"/>
+          <path d="M140 50 L235 107.5 L235 172.5 L140 230 L45 172.5 L45 107.5 Z" stroke="#ff00aa" stroke-width=".5" fill="none" opacity=".15"/>
+        </svg>
+        <div class="hex-inner"><div class="hex-num">02</div><div class="hex-lbl" data-i18n="hex-lbl">Projects<br>Launched</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ STACK ══ -->
+<section class="stack" id="stack">
+  <div class="reveal">
+    <p class="section-label" data-i18n="stack-label">Stack</p>
+    <h2 class="section-title" data-i18n="stack-title">МОЙ СТЕК</h2>
+  </div>
+  <div class="stack-grid">
+    <!-- Next.js -->
+    <div class="stack-card reveal" style="--card-color:rgba(255,255,255,.4);--card-glow:rgba(255,255,255,.08)">
+      <div class="stack-icon">
+        <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="38" fill="#0a0a0a" stroke="#333" stroke-width="2"/><path d="M24 58V22l37 42V24" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="stack-name">Next.js</div>
+      <div class="stack-desc" data-i18n="stack-next">React фреймворк<br>для прода</div>
+    </div>
+    <!-- Supabase -->
+    <div class="stack-card reveal" style="--card-color:rgba(62,207,142,.5);--card-glow:rgba(62,207,142,.1)">
+      <div class="stack-icon">
+        <svg viewBox="0 0 80 80" fill="none"><path d="M46 8L10 48h36V72l34-48H46z" fill="#3ECF8E"/></svg>
+      </div>
+      <div class="stack-name" style="color:#3ECF8E">Supabase</div>
+      <div class="stack-desc" data-i18n="stack-supabase">БД, Auth<br>и Storage</div>
+    </div>
+    <!-- Vercel -->
+    <div class="stack-card reveal" style="--card-color:rgba(255,255,255,.4);--card-glow:rgba(255,255,255,.07)">
+      <div class="stack-icon">
+        <svg viewBox="0 0 80 80" fill="none"><polygon points="40,10 74,70 6,70" fill="#fff"/></svg>
+      </div>
+      <div class="stack-name">Vercel</div>
+      <div class="stack-desc" data-i18n="stack-vercel">Деплой<br>за секунды</div>
+    </div>
+    <!-- Tailwind -->
+    <div class="stack-card reveal" style="--card-color:rgba(56,189,248,.5);--card-glow:rgba(56,189,248,.1)">
+      <div class="stack-icon">
+        <svg viewBox="0 0 80 80" fill="none">
+          <path d="M12,28 Q26,8 40,28 Q54,48 68,28" stroke="#38BDF8" stroke-width="9" fill="none" stroke-linecap="round"/>
+          <path d="M12,50 Q26,30 40,50 Q54,70 68,50" stroke="#38BDF8" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stack-name" style="color:#38BDF8">Tailwind</div>
+      <div class="stack-desc" data-i18n="stack-tailwind">Стилизация<br>без боли</div>
+    </div>
+    <!-- Claude -->
+    <div class="stack-card reveal" style="--card-color:rgba(217,119,87,.5);--card-glow:rgba(217,119,87,.1)">
+      <div class="stack-icon">
+        <svg viewBox="0 0 80 80" fill="none">
+          <circle cx="40" cy="40" r="36" fill="#1a0f0a" stroke="#D97757" stroke-width="2"/>
+          <text x="40" y="53" text-anchor="middle" font-size="38" font-weight="700" fill="#D97757" font-family="Georgia,serif">C</text>
+        </svg>
+      </div>
+      <div class="stack-name" style="color:#D97757">Claude</div>
+      <div class="stack-desc" data-i18n="stack-claude">AI-движок<br>проектов</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TIMELINE ══ -->
+<section class="timeline" id="timeline">
+  <div class="reveal">
+    <p class="section-label" data-i18n="tl-label">Timeline</p>
+    <h2 class="section-title" data-i18n="tl-title">BUILD SYSTEM</h2>
+  </div>
+  <div class="build-system reveal">
+    <div class="bs-track">
+      <article class="bs-step" tabindex="0">
+        <div class="bs-meta">
+          <span class="bs-step-dot" aria-hidden="true"></span>
+          <span class="bs-num">01</span>
+          <h3 class="bs-step-title" data-i18n="bs-s1-title">Диагностика</h3>
+        </div>
+        <p class="bs-deliverable" data-i18n="bs-s1-deliverable">Бизнес-цели, аудитория, KPI, MVP scope</p>
+        <div class="bs-proofs">
+          <p class="proof proof-eastlane"><span class="proof-label">EASTLANE</span><span class="proof-text" data-i18n="bs-s1-eastlane">Определил SKU-фокус и сценарий первого заказа</span></p>
+          <p class="proof proof-aletheia"><span class="proof-label">АЛЕТЕЙЯ</span><span class="proof-text" data-i18n="bs-s1-aletheia">Выделил сегменты: игроки, клубы, агенты, тренеры</span></p>
+        </div>
+      </article>
+
+      <article class="bs-step" tabindex="0">
+        <div class="bs-meta">
+          <span class="bs-step-dot" aria-hidden="true"></span>
+          <span class="bs-num">02</span>
+          <h3 class="bs-step-title" data-i18n="bs-s2-title">Архитектура</h3>
+        </div>
+        <p class="bs-deliverable" data-i18n="bs-s2-deliverable">Информационная структура, роли, сценарии, data-flow</p>
+        <div class="bs-proofs">
+          <p class="proof proof-eastlane"><span class="proof-label">EASTLANE</span><span class="proof-text" data-i18n="bs-s2-eastlane">Спроектировал каталог, карточку, корзину, checkout</span></p>
+          <p class="proof proof-aletheia"><span class="proof-label">АЛЕТЕЙЯ</span><span class="proof-text" data-i18n="bs-s2-aletheia">Собрал структуру услуг, кейсов, FAQ и навигации</span></p>
+        </div>
+      </article>
+
+      <article class="bs-step" tabindex="0">
+        <div class="bs-meta">
+          <span class="bs-step-dot" aria-hidden="true"></span>
+          <span class="bs-num">03</span>
+          <h3 class="bs-step-title" data-i18n="bs-s3-title">Интерфейс</h3>
+        </div>
+        <p class="bs-deliverable" data-i18n="bs-s3-deliverable">UI-kit, ключевые экраны, адаптивные состояния</p>
+        <div class="bs-proofs">
+          <p class="proof proof-eastlane"><span class="proof-label">EASTLANE</span><span class="proof-text" data-i18n="bs-s3-eastlane">Собрал витрину с упором на конверсию в заявку</span></p>
+          <p class="proof proof-aletheia"><span class="proof-label">АЛЕТЕЙЯ</span><span class="proof-text" data-i18n="bs-s3-aletheia">Сделал доверительный интерфейс для legal-tech аудитории</span></p>
+        </div>
+      </article>
+
+      <article class="bs-step" tabindex="0">
+        <div class="bs-meta">
+          <span class="bs-step-dot" aria-hidden="true"></span>
+          <span class="bs-num">04</span>
+          <h3 class="bs-step-title" data-i18n="bs-s4-title">Разработка</h3>
+        </div>
+        <p class="bs-deliverable" data-i18n="bs-s4-deliverable">Frontend/Backend интеграция, контент-модули, QA</p>
+        <div class="bs-proofs">
+          <p class="proof proof-eastlane"><span class="proof-label">EASTLANE</span><span class="proof-text" data-i18n="bs-s4-eastlane">Реализовал Next.js + Supabase: корзина и заказы</span></p>
+          <p class="proof proof-aletheia"><span class="proof-label">АЛЕТЕЙЯ</span><span class="proof-text" data-i18n="bs-s4-aletheia">Внедрил мультиязычность, кейсы и структуру экспертности</span></p>
+        </div>
+      </article>
+
+      <article class="bs-step" tabindex="0">
+        <div class="bs-meta">
+          <span class="bs-step-dot" aria-hidden="true"></span>
+          <span class="bs-num">05</span>
+          <h3 class="bs-step-title" data-i18n="bs-s5-title">Запуск и рост</h3>
+        </div>
+        <p class="bs-deliverable" data-i18n="bs-s5-deliverable">Деплой, аналитика, SEO/итерации</p>
+        <div class="bs-proofs">
+          <p class="proof proof-eastlane"><span class="proof-label">EASTLANE</span><span class="proof-text" data-i18n="bs-s5-eastlane">Запуск на Vercel и оптимизация пути до покупки</span></p>
+          <p class="proof proof-aletheia"><span class="proof-label">АЛЕТЕЙЯ</span><span class="proof-text" data-i18n="bs-s5-aletheia">Публикация, позиционирование, расширение охвата</span></p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROJECTS ══ -->
+<section class="projects" id="projects">
+  <div class="reveal">
+    <p class="section-label" data-i18n="projects-label">Work</p>
+    <h2 class="section-title" data-i18n="projects-title">МОИ ПРОЕКТЫ</h2>
+  </div>
+  <div class="projects-grid">
+    <a class="project-card reveal" data-num="01" href="https://eastlane.ru" target="_blank" rel="noopener noreferrer">
+      <div class="project-preview"><iframe src="https://eastlane.ru" loading="lazy" title="EASTLANE" sandbox="allow-same-origin allow-scripts"></iframe></div>
+      <p class="project-num">PROJECT — 01</p>
+      <h3 class="project-title">EASTLANE</h3>
+      <span class="project-type" data-i18n="p1-type">E-commerce</span>
+      <p class="project-desc" data-i18n="p1-desc">Интернет-магазин для прямого выкупа одежды и аксессуаров из Китая. Бренды Nike, Gucci, Prada, Dior — напрямую с фабрик. Индивидуальный подход на всех этапах.</p>
+      <span class="project-link">eastlane.ru</span>
+    </a>
+    <a class="project-card reveal" data-num="02" href="https://aletheia-weld.vercel.app/" target="_blank" rel="noopener noreferrer" style="--cyan:#a855f7;--glow-cyan:0 0 10px #a855f7,0 0 30px #a855f744;">
+      <div class="project-preview"><iframe src="https://aletheia-weld.vercel.app/" loading="lazy" title="Алетейя" sandbox="allow-same-origin allow-scripts"></iframe></div>
+      <p class="project-num" style="color:#a855f7">PROJECT — 02</p>
+      <h3 class="project-title">АЛЕТЕЙЯ</h3>
+      <span class="project-type" style="color:#a855f7;border-color:rgba(168,85,247,.3)" data-i18n="p2-type">Legal Tech</span>
+      <p class="project-desc" data-i18n="p2-desc">Платформа юридической защиты для профессионального футбола. РФС, UEFA, FIFA, CAS — от контракта до арбитража. Для игроков, клубов, агентов и тренеров.</p>
+      <span class="project-link" style="color:#a855f7">aletheia-weld.vercel.app</span>
+    </a>
+  </div>
+</section>
+
+<!-- ══ CONTACT ══ -->
+<section class="contact" id="contact">
+  <div class="reveal">
+    <p class="section-label" data-i18n="contact-label">Contact</p>
+    <h2 class="section-title" data-i18n="contact-title">ПОГОВОРИМ?</h2>
+  </div>
+  <div class="contact-inner">
+    <p class="contact-tagline reveal" data-i18n="contact-tagline">
+      Есть идея, проект или задача? Напишите — разберём концепцию, выберем стек, запустим.<br>
+      <span style="color:var(--cyan)">От слова до продукта.<span class="blink">_</span></span>
+    </p>
+
+    <!-- TG link + copy -->
+    <div class="contact-links reveal">
+      <a class="contact-link" href="https://t.me/lolyousee" target="_blank" rel="noopener noreferrer">
+        <div class="cl-main">
+          <span class="cl-icon" aria-hidden="true"><i class="fa-brands fa-telegram"></i></span>
+          <div class="cl-meta">
+            <div class="cl-platform">Telegram</div>
+            <div class="cl-name"><span class="cl-at">@</span><span class="cl-username">lolyousee</span></div>
+          </div>
+        </div>
+        <span class="cl-arrow">→</span>
+      </a>
+      <a class="contact-link" href="https://instagram.com/somedieyung" target="_blank" rel="noopener noreferrer">
+        <div class="cl-main">
+          <span class="cl-icon" aria-hidden="true"><i class="fa-brands fa-instagram"></i></span>
+          <div class="cl-meta">
+            <div class="cl-platform">Instagram</div>
+            <div class="cl-name"><span class="cl-at">@</span><span class="cl-username">somedieyung</span></div>
+          </div>
+        </div>
+        <span class="cl-arrow">→</span>
+      </a>
+    </div>
+    <!-- AI Idea Generator -->
+    <div class="idea-gen reveal">
+      <div class="idea-gen-head">
+        <span class="idea-label" data-i18n="idea-label">AI Idea Generator</span>
+        <button class="idea-btn" id="ideaBtn">
+          <span id="ideaBtnIcon">✦</span>
+          <span data-i18n="idea-btn">Придумай мне проект</span>
+        </button>
+      </div>
+      <div class="idea-result" id="ideaResult">
+        <button class="idea-close" id="ideaCloseBtn" aria-label="Закрыть идею" title="Закрыть идею">&times;</button>
+        <div class="idea-result-text" id="ideaText"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <span class="footer-logo">LOLYOUSEE</span>
+  <span data-i18n="footer-copy">© 2025 — Vibe Coder. All vibes reserved.</span>
+  <span style="color:rgba(0,245,255,.3)">[ ONLINE ]</span>
+</footer>
+
+<script>
+setTimeout(() => {
+  document.getElementById('preloader')?.classList.add('hide');
+  document.dispatchEvent(new Event('preloader:done'));
+}, 8500);
+</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
+

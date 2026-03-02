@@ -4,6 +4,11 @@
 window.__APP_STARTED__ = true;
 const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 const isCoarsePointer = window.matchMedia?.('(pointer: coarse)')?.matches ?? false;
+const hasFinePointer = window.matchMedia?.('(pointer: fine)')?.matches ?? false;
+const hasHover = window.matchMedia?.('(hover: hover)')?.matches ?? false;
+const isMobileViewport = window.matchMedia?.('(max-width: 768px)')?.matches ?? false;
+const canUseCustomCursor = hasFinePointer && hasHover && !prefersReducedMotion;
+const shouldUseHeavyHeroEffects = !prefersReducedMotion && !isCoarsePointer && !isMobileViewport;
 
 const LANG = {
   ru: {
@@ -373,7 +378,7 @@ if (progressBar) {
 (function(){
   const wrap = document.getElementById('glitchWrap');
   const heroEl = document.querySelector('.hero');
-  if (!wrap || !heroEl) return;
+  if (!wrap || !heroEl || !shouldUseHeavyHeroEffects) return;
   heroEl.addEventListener('mousemove', e => {
     const r = heroEl.getBoundingClientRect();
     const dx = (e.clientX - r.left - r.width  / 2) / (r.width  / 2);
@@ -671,22 +676,46 @@ document.getElementById('ideaCloseBtn')?.addEventListener('click', () => {
 ══════════════════════════════════════════════ */
 const cursor = document.getElementById('cursor');
 const ring   = document.getElementById('cursor-ring');
-if (!isCoarsePointer && !prefersReducedMotion && cursor && ring) {
+if (canUseCustomCursor && cursor && ring) {
+  document.documentElement.classList.add('has-custom-cursor');
+
   let mx = 0, my = 0;
+  let hasPointerMove = false;
+  cursor.style.opacity = '0';
+  ring.style.opacity = '0';
+
+  function revealCursor() {
+    if (hasPointerMove) return;
+    hasPointerMove = true;
+    cursor.style.opacity = '1';
+    ring.style.opacity = '1';
+    ring.style.left = mx + 'px';
+    ring.style.top = my + 'px';
+  }
+
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
     cursor.style.left = mx+'px'; cursor.style.top = my+'px';
+    revealCursor();
   }, {passive:true});
+
   (function animRing(){
+    if (!hasPointerMove) {
+      requestAnimationFrame(animRing);
+      return;
+    }
     const rx = parseFloat(ring.style.left)||0, ry = parseFloat(ring.style.top)||0;
     ring.style.left = (rx+(mx-rx)*.12)+'px';
     ring.style.top  = (ry+(my-ry)*.12)+'px';
     requestAnimationFrame(animRing);
   })();
+
   document.querySelectorAll('a,button').forEach(el => {
     el.addEventListener('mouseenter',()=>{ cursor.style.width='20px';cursor.style.height='20px';cursor.style.borderColor='#ff00aa'; });
     el.addEventListener('mouseleave',()=>{ cursor.style.width='12px';cursor.style.height='12px';cursor.style.borderColor='#00f5ff'; });
   });
+} else {
+  document.documentElement.classList.remove('has-custom-cursor');
 }
 
 /* ══════════════════════════════════════════════
@@ -707,7 +736,7 @@ if (!('IntersectionObserver' in window) || prefersReducedMotion) {
    GLITCH FLICKER
 ══════════════════════════════════════════════ */
 const heroName = document.querySelector('.hero-name');
-if (!prefersReducedMotion && heroName) {
+if (shouldUseHeavyHeroEffects && heroName) {
   setInterval(() => {
     if (Math.random() < .3) {
       heroName.style.textShadow = `${(Math.random()-.5)*8}px 0 #00f5ff,${(Math.random()-.5)*8}px 0 #ff00aa`;

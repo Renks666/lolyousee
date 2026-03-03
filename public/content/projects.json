@@ -1,0 +1,66 @@
+﻿{
+  "items": [
+    {
+      "id": "eastlane",
+      "name": "EASTLANE",
+      "type": {"ru": "E-commerce", "en": "E-commerce"},
+      "url": "https://eastlane.ru",
+      "preview": "https://eastlane.ru",
+      "status": "DEPLOYED",
+      "accent": "cyan",
+      "summary": {
+        "ru": "Интернет-магазин для прямого выкупа одежды и аксессуаров из Китая с фокусом на быстрый путь до заявки.",
+        "en": "An e-commerce storefront for direct apparel sourcing from China with a conversion-focused customer flow."
+      },
+      "role": {
+        "ru": "Роль: продуктовая диагностика, UX-архитектура, full-stack реализация.",
+        "en": "Role: product discovery, UX architecture, full-stack implementation."
+      },
+      "challenge": {
+        "ru": "Задача: сделать витрину, которая одинаково хорошо продает каталог и принимает индивидуальные заявки.",
+        "en": "Challenge: build a storefront that handles both catalog sales and custom purchase requests."
+      },
+      "solution": {
+        "ru": "Решение: модульный каталог + сценарии first-order + упрощенный funnel до контакта.",
+        "en": "Solution: modular catalog, first-order scenarios, and a simplified inquiry funnel."
+      },
+      "outcomes": [
+        {"ru": "Собран стабильный MVP e-commerce в production", "en": "Stable production-ready e-commerce MVP shipped"},
+        {"ru": "Сокращен путь от первого касания до заявки", "en": "Reduced path from first visit to lead"},
+        {"ru": "Подготовлена база для масштабирования SKU", "en": "Prepared architecture for SKU scale-up"}
+      ],
+      "stack": ["Next.js", "Supabase", "Vercel"]
+    },
+    {
+      "id": "aletheia",
+      "name": "АЛЕТЕЙЯ",
+      "type": {"ru": "Legal Tech", "en": "Legal Tech"},
+      "url": "https://aletheia-weld.vercel.app/",
+      "preview": "https://aletheia-weld.vercel.app/",
+      "status": "BUILDING",
+      "accent": "violet",
+      "summary": {
+        "ru": "Платформа юридической защиты для профессионального футбола с мультисегментной аудиторией.",
+        "en": "A legal-tech platform for professional football with a multi-segment audience."
+      },
+      "role": {
+        "ru": "Роль: системный дизайн, контент-архитектура, мультиязычная реализация.",
+        "en": "Role: system design, content architecture, multilingual implementation."
+      },
+      "challenge": {
+        "ru": "Задача: объяснить сложную legal-экспертизу через чистый и доверительный интерфейс.",
+        "en": "Challenge: communicate complex legal expertise through a clean, trust-first interface."
+      },
+      "solution": {
+        "ru": "Решение: четкая IA, блоки кейсов и FAQ, акцент на сценарии игроков, клубов и агентов.",
+        "en": "Solution: clear IA, case and FAQ blocks, and audience-specific user journeys."
+      },
+      "outcomes": [
+        {"ru": "Упакована экспертность в понятную цифровую структуру", "en": "Expert positioning translated into a clear digital structure"},
+        {"ru": "Повышено доверие за счет прозрачного сценария работы", "en": "Trust increased through transparent service flow"},
+        {"ru": "Готовность к SEO- и контент-итерациям", "en": "Prepared for SEO and content iterations"}
+      ],
+      "stack": ["Next.js", "Supabase", "Vercel", "i18n"]
+    }
+  ]
+}

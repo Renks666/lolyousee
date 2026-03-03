@@ -1,0 +1,22 @@
+﻿{
+  "items": [
+    {
+      "q_ru": "Q> Сколько времени занимает запуск MVP?",
+      "a_ru": "A> Обычно 1-3 дня. В зависимости от сложности проекта.",
+      "q_en": "Q> How long does an MVP launch take?",
+      "a_en": "A> Usually 3-5 days."
+    },
+    {
+      "q_ru": "Q> Вы работаете только с full-stack задачами?",
+      "a_ru": "A> Нет. Можно зайти с точечной задачи: UI-полировка, генерация контента, автоматизация флоу.",
+      "q_en": "Q> Do you only take full-stack projects?",
+      "a_en": "A> No. You can start with a narrow scope: UI polish, content systems, or workflow automation."
+    },
+    {
+      "q_ru": "Q> Что нужно от меня на старте?",
+      "a_ru": "A> Ниша, цель, текущая точка и желаемый результат. Остальное раскладывается в процессе диагностики.",
+      "q_en": "Q> What do you need from me to start?",
+      "a_en": "A> Your niche, objective, current state, and desired outcome. The rest is structured during discovery."
+    }
+  ]
+}

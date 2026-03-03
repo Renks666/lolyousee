@@ -1,0 +1,46 @@
+﻿{
+  "items": [
+    {
+      "name_ru": "Вайб-кодинг",
+      "name_en": "Vibe Coding",
+      "tip_ru": "Разработка с AI как основным инструментом",
+      "tip_en": "Building with AI as the primary execution tool"
+    },
+    {
+      "name_ru": "Full-stack",
+      "name_en": "Full-stack",
+      "tip_ru": "Frontend + Backend + DevOps в одном контуре",
+      "tip_en": "Frontend + Backend + DevOps in one workflow"
+    },
+    {
+      "name_ru": "Product thinking",
+      "name_en": "Product Thinking",
+      "tip_ru": "Фокус на результате для бизнеса, а не на фичах ради фич",
+      "tip_en": "Outcome-first decisions instead of feature-first noise"
+    },
+    {
+      "name_ru": "UI/UX",
+      "name_en": "UI/UX",
+      "tip_ru": "Интерфейсы, которые ведут к действию",
+      "tip_en": "Interfaces that push toward action"
+    },
+    {
+      "name_ru": "Architecture",
+      "name_en": "Architecture",
+      "tip_ru": "Масштабируемая система от структуры до компонентов",
+      "tip_en": "Scalable structure from information architecture to components"
+    },
+    {
+      "name_ru": "MVP Launch",
+      "name_en": "MVP Launch",
+      "tip_ru": "От идеи до рабочего релиза коротким циклом",
+      "tip_en": "From idea to working release in short cycles"
+    },
+    {
+      "name_ru": "Business logic",
+      "name_en": "Business Logic",
+      "tip_ru": "Код, который закрывает реальные операционные задачи",
+      "tip_en": "Code that solves real operational and growth tasks"
+    }
+  ]
+}

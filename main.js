@@ -7,8 +7,17 @@ const isCoarsePointer = window.matchMedia?.('(pointer: coarse)')?.matches ?? fal
 const hasFinePointer = window.matchMedia?.('(pointer: fine)')?.matches ?? false;
 const hasHover = window.matchMedia?.('(hover: hover)')?.matches ?? false;
 const isMobileViewport = window.matchMedia?.('(max-width: 768px)')?.matches ?? false;
-const canUseCustomCursor = hasFinePointer && hasHover && !prefersReducedMotion;
-const shouldUseHeavyHeroEffects = !prefersReducedMotion && !isCoarsePointer && !isMobileViewport;
+const initialMotionMode = prefersReducedMotion ? 'reduced' : ((isCoarsePointer || isMobileViewport) ? 'minimal' : 'full');
+const UI_STATE = {
+  motionMode: initialMotionMode,
+  currentLang: 'ru',
+  isAfterHero: false,
+  generatorState: 'idle'
+};
+const CONTENT = { projects: [], faq: [], signals: [], skills: [] };
+document.documentElement.dataset.motion = initialMotionMode;
+const canUseCustomCursor = hasFinePointer && hasHover && initialMotionMode === 'full';
+const shouldUseHeavyHeroEffects = initialMotionMode === 'full';
 
 const LANG = {
   ru: {
@@ -22,12 +31,14 @@ const LANG = {
     'nav-about':        'About',
     'nav-stack':        'Stack',
     'nav-projects':     'Projects',
+    'nav-generator':    'AI Ideas',
+    'nav-faq':          'FAQ',
     'nav-contact':      'Contact',
     'nav-btn-work':     'Проекты',
     'nav-btn-contact':  'Связаться',
     'lang-label':       'Язык:',
     'about-label':      'About',
-    'about-title':      'КТО Я',
+    'about-title':      'ОБО МНЕ',
     'about-text':       'Результат — стильные, чистые и рабочие решения, ориентированные на рост бизнеса. Вайбкодинг — это не просто инструмент, это новый способ мышления: когда скорость итерации важнее бюрократии, а качество результата говорит само за себя.',
     'cnt-projects':     'Проекта',
     'cnt-launch':       'До прода',
@@ -62,21 +73,59 @@ const LANG = {
     'bs-s5-deliverable':'Деплой, аналитика, SEO/итерации',
     'bs-s5-eastlane':   'Запуск на Vercel и оптимизация пути до покупки',
     'bs-s5-aletheia':   'Публикация, позиционирование, расширение охвата',
+    'signals-label':    'Signal Feed',
     'projects-label':   'Work',
     'projects-title':   'МОИ ПРОЕКТЫ',
-    'p1-type':          'E-commerce',
-    'p1-desc':          'Интернет-магазин для прямого выкупа одежды и аксессуаров из Китая. Бренды Nike, Gucci, Prada, Dior — напрямую с фабрик. Индивидуальный подход на всех этапах.',
-    'p2-type':          'Legal Tech',
-    'p2-desc':          'Платформа юридической защиты для профессионального футбола. РФС, UEFA, FIFA, CAS — от контракта до арбитража. Для игроков, клубов, агентов и тренеров.',
+    'project-details':  'Подробнее',
+    'project-open':     'Открыть',
+    'case-open-site':   'Открыть сайт',
+    'metrics-total':    'Систем запущено',
+    'metrics-live':     'В active-состоянии',
+    'metrics-cycle':    'Цикл запуска',
+    'metrics-cycle-value': '3-5 дн',
+    'process-log-title': 'Process Command Log',
+    'process-log-lines': [
+      '[01] intake -> ниша, задача, KPI',
+      '[02] mapping -> роли, флоу, риски',
+      '[03] build -> интерфейс + логика + интеграции',
+      '[04] deploy -> релиз + аналитика + итерации'
+    ],
+    'process-kpi-1':    'Product fit',
+    'process-kpi-2':    'Launch readiness',
+    'process-kpi-3':    'Delivery speed',
+    'case-role':        'РОЛЬ',
+    'case-challenge':   'ЗАДАЧА',
+    'case-solution':    'РЕШЕНИЕ',
+    'case-outcomes':    'РЕЗУЛЬТАТ',
     'contact-label':    'Contact',
-    'contact-title':    'ПОГОВОРИМ?',
+    'contact-title':    'СВЯЗЬ СО МНОЙ',
     'contact-tagline':  'Есть идея, проект или задача? Напишите — разберём концепцию, выберем стек, запустим.',
-    'idea-label':       'AI Idea Generator',
-    'idea-btn':         'Придумай мне проект',
-    'idea-loading':     'Генерирую офлайн...',
-    'idea-close':       'Закрыть идею',
-    'idea-prompt':      'Придумай оригинальную идею для веб-проекта для вайб-кодера. Формат ответа — три строки без markdown: 1) Название проекта, 2) Суть идеи (1-2 предложения), 3) Стек технологий. Без лишних слов.',
-    'footer-copy':      '© 2025 — Vibe Coder. All vibes reserved.',
+    'generator-label':  '005 - AI Tool',
+    'generator-title':  'ПРИДУМАЙ ПРОЕКТ',
+    'generator-badge':  '[OPENAI]',
+    'generator-input-label': 'input',
+    'generator-output-label': 'output',
+    'generator-input-placeholder': 'ниша, идея, проблема...',
+    'generator-output-placeholder': '// Введи нишу - получишь название, MVP-фичи и стек',
+    'generator-run':    'RUN ->',
+    'generator-running':'Running...',
+    'generator-command-empty': '...',
+    'generator-error-prefix': '// Error:',
+    'generator-tone-brief': 'Brief',
+    'generator-tone-detailed': 'Detailed',
+    'generator-presets': ['Legal Tech', 'E-commerce', 'Creator Economy', 'Local Services'],
+    'faq-label':        'FAQ',
+    'faq-title':        'ВОПРОСЫ -> ОТВЕТЫ',
+    'faq-mvp-tip':      'Минимально жизнеспособный продукт: базовая версия для быстрой проверки спроса.',
+    'lead-niche-placeholder': 'Ниша / идея',
+    'lead-goal-mvp':    'MVP запуск',
+    'lead-goal-redesign': 'Редизайн сайта',
+    'lead-goal-automation': 'Автоматизация процесса',
+    'lead-budget-boot': 'Bootstrapped',
+    'lead-budget-mid':  'Middle budget',
+    'lead-budget-scale':'Scale budget',
+    'lead-submit':      'Отправить в Telegram',
+    'footer-copy':      '© 2026. All vibes reserved.',
     'skills': [
       {name:'Вайб-кодинг',  tip:'Разработка с AI как основным инструментом'},
       {name:'Full-stack',   tip:'Frontend + Backend + DevOps в одном'},
@@ -98,6 +147,8 @@ const LANG = {
     'nav-about':        'About',
     'nav-stack':        'Stack',
     'nav-projects':     'Projects',
+    'nav-generator':    'AI Ideas',
+    'nav-faq':          'FAQ',
     'nav-contact':      'Contact',
     'nav-btn-work':     'Projects',
     'nav-btn-contact':  'Contact',
@@ -138,21 +189,59 @@ const LANG = {
     'bs-s5-deliverable':'Deployment, analytics, SEO, iteration loop',
     'bs-s5-eastlane':   'Launched on Vercel and optimized the purchase path',
     'bs-s5-aletheia':   'Published, positioned, and expanded audience reach',
+    'signals-label':    'Signal Feed',
     'projects-label':   'Work',
     'projects-title':   'MY PROJECTS',
-    'p1-type':          'E-commerce',
-    'p1-desc':          'Online store for direct purchasing of clothing and accessories from China. Brands Nike, Gucci, Prada, Dior — directly from factories. Individual approach at every step.',
-    'p2-type':          'Legal Tech',
-    'p2-desc':          'Legal protection platform for professional football. RFU, UEFA, FIFA, CAS — from contract to arbitration. For players, clubs, agents and coaches.',
+    'project-details':  'Details',
+    'project-open':     'Open',
+    'case-open-site':   'Open Website',
+    'metrics-total':    'Systems launched',
+    'metrics-live':     'Currently active',
+    'metrics-cycle':    'Launch cycle',
+    'metrics-cycle-value': '3-5 days',
+    'process-log-title': 'Process Command Log',
+    'process-log-lines': [
+      '[01] intake -> niche, task, KPIs',
+      '[02] mapping -> roles, flows, risks',
+      '[03] build -> interface + logic + integrations',
+      '[04] deploy -> release + analytics + iterations'
+    ],
+    'process-kpi-1':    'Product fit',
+    'process-kpi-2':    'Launch readiness',
+    'process-kpi-3':    'Delivery speed',
+    'case-role':        'ROLE',
+    'case-challenge':   'CHALLENGE',
+    'case-solution':    'SOLUTION',
+    'case-outcomes':    'OUTCOMES',
     'contact-label':    'Contact',
     'contact-title':    'LET\'S TALK?',
     'contact-tagline':  'Have an idea, project or task? Write me — we\'ll break down the concept, pick the stack, launch it.',
-    'idea-label':       'AI Idea Generator',
-    'idea-btn':         'Generate Project Idea',
-    'idea-loading':     'Generating offline...',
-    'idea-close':       'Close idea',
-    'idea-prompt':      'Generate an original web project idea for a vibe coder. Response format — three plain text lines, no markdown: 1) Project name, 2) Core idea (1-2 sentences), 3) Tech stack. No extra words.',
-    'footer-copy':      '© 2025 — Vibe Coder. All vibes reserved.',
+    'generator-label':  '005 - AI Tool',
+    'generator-title':  'IDEA GENERATOR',
+    'generator-badge':  '[OPENAI]',
+    'generator-input-label': 'input',
+    'generator-output-label': 'output',
+    'generator-input-placeholder': 'niche, idea, problem...',
+    'generator-output-placeholder': '// Enter a niche to get a name, MVP features, and stack',
+    'generator-run':    'RUN ->',
+    'generator-running':'Running...',
+    'generator-command-empty': '...',
+    'generator-error-prefix': '// Error:',
+    'generator-tone-brief': 'Brief',
+    'generator-tone-detailed': 'Detailed',
+    'generator-presets': ['Legal Tech', 'E-commerce', 'Creator Economy', 'Local Services'],
+    'faq-label':        'FAQ',
+    'faq-title':        'OBJECTIONS -> ANSWERS',
+    'faq-mvp-tip':      'Minimum Viable Product: a basic version to validate demand fast.',
+    'lead-niche-placeholder': 'Niche / idea',
+    'lead-goal-mvp':    'MVP launch',
+    'lead-goal-redesign': 'Site redesign',
+    'lead-goal-automation': 'Process automation',
+    'lead-budget-boot': 'Bootstrapped',
+    'lead-budget-mid':  'Middle budget',
+    'lead-budget-scale':'Scale budget',
+    'lead-submit':      'Send to Telegram',
+    'footer-copy':      '© 2026. All vibes reserved.',
     'skills': [
       {name:'Vibe Coding',      tip:'Building with AI as the primary tool'},
       {name:'Full-stack',       tip:'Frontend + Backend + DevOps in one'},
@@ -166,6 +255,42 @@ const LANG = {
 };
 
 let currentLang = 'ru';
+UI_STATE.currentLang = currentLang;
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('\'', '&#39;');
+}
+
+function getLocalized(field, lang = currentLang) {
+  if (field == null) return '';
+  if (typeof field === 'string') return field;
+  return field[lang] ?? field.ru ?? field.en ?? '';
+}
+
+function domainFromUrl(url) {
+  try { return new URL(url).hostname; } catch { return url; }
+}
+
+function statusClass(status) {
+  if (status === 'DEPLOYED') return 'status-chip-deploy';
+  if (status === 'BUILDING') return 'status-chip-build';
+  return '';
+}
+
+async function loadJson(path) {
+  try {
+    const response = await fetch(path, { headers: { 'Accept': 'application/json' } });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
 
 function forceShowContent() {
   document.getElementById('preloader')?.classList.add('hide');
@@ -179,6 +304,7 @@ window.addEventListener('unhandledrejection', forceShowContent);
 
 function applyLang(lang) {
   currentLang = lang;
+  UI_STATE.currentLang = lang;
   const t = LANG[lang];
   document.documentElement.lang = lang;
   // Text nodes
@@ -186,12 +312,17 @@ function applyLang(lang) {
     const key = el.dataset.i18n;
     if (t[key] !== undefined) el.textContent = t[key];
   });
+  // Placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (t[key] !== undefined) el.setAttribute('placeholder', t[key]);
+  });
   // About text has a cyan span
   const atEl = document.querySelector('[data-i18n="about-text"]');
   if (atEl) {
     atEl.innerHTML = lang === 'ru'
-      ? 'Результат — стильные, чистые и рабочие решения, ориентированные на рост бизнеса. <span style="color:var(--cyan)">Вайбкодинг — это не просто инструмент</span>, это новый способ мышления: когда скорость итерации важнее бюрократии, а качество результата говорит само за себя.'
-      : 'The result — stylish, clean, and functional solutions focused on business growth. <span style="color:var(--cyan)">Vibe coding isn\'t just a tool</span>, it\'s a new way of thinking: where iteration speed beats bureaucracy, and the quality of the result speaks for itself.';
+      ? 'Результат - стильные, чистые и рабочие решения, ориентированные на рост бизнеса. <span style="color:var(--cyan)">Вайбкодинг - это не просто инструмент</span>, это новый способ мышления: когда скорость итерации важнее бюрократии, а качество результата говорит само за себя.'
+      : 'The result - stylish, clean, and functional solutions focused on business growth. <span style="color:var(--cyan)">Vibe coding is not just a tool</span>, it is a new way of thinking: where iteration speed beats bureaucracy, and the quality of the result speaks for itself.';
   }
   // Contact tagline
   const ctEl = document.querySelector('[data-i18n="contact-tagline"]');
@@ -205,32 +336,45 @@ function applyLang(lang) {
   const hexEl = document.querySelector('[data-i18n="hex-lbl"]');
   if (hexEl) hexEl.innerHTML = lang === 'ru' ? 'Projects<br>Launched' : 'Projects<br>Launched';
   // Counter suffix update
-  document.querySelector('[data-suffix="ч"]') && (lang === 'en'
-    ? document.querySelector('[data-suffix="ч"]').setAttribute('data-suffix', 'h')
-    : document.querySelector('[data-suffix="h"]')?.setAttribute('data-suffix', 'ч'));
+  const replyCounter = document.querySelector('#counters .counter-item:last-child .counter-num[data-target]');
+  if (replyCounter) {
+    const suffix = lang === 'ru' ? ' ч' : ' h';
+    const value = Number.parseInt(replyCounter.textContent, 10) || Number(replyCounter.dataset.target) || 0;
+    replyCounter.setAttribute('data-suffix', suffix);
+    replyCounter.textContent = (value < 10 ? '0' : '') + value + suffix;
+  }
   // Lang toggle buttons
   document.querySelectorAll('.lang-toggle').forEach(b => b.textContent = lang === 'ru' ? 'EN' : 'RU');
   // Skills rebuild
   buildSkills(lang);
-  const ideaCloseBtn = document.getElementById('ideaCloseBtn');
-  if (ideaCloseBtn) {
-    const closeLabel = t['idea-close'];
-    ideaCloseBtn.setAttribute('title', closeLabel);
-    ideaCloseBtn.setAttribute('aria-label', closeLabel);
-  }
+  renderSignals();
+  renderProcessLog();
+  renderProjects();
+  renderCaseMetrics();
+  renderFaq();
+  syncGeneratorLanguage();
+  observeRevealElements(document);
   // Retype hero tag
   typeHeroTag(lang);
   // title
-  document.title = 'LOLYOUSEE — ' + (lang === 'ru' ? 'Vibe Coder' : 'Vibe Coder');
+  document.title = 'LOLYOUSEE - Vibe Coder';
 }
 
 function buildSkills(lang) {
   const list = document.getElementById('skillsList');
   if (!list) return;
   list.innerHTML = '';
-  LANG[lang].skills.forEach(s => {
+  const skills = CONTENT.skills.length
+    ? CONTENT.skills.map(item => ({
+        name: lang === 'ru' ? item.name_ru : item.name_en,
+        tip: lang === 'ru' ? item.tip_ru : item.tip_en
+      }))
+    : LANG[lang].skills;
+  skills.forEach((s, idx) => {
     const el = document.createElement('span');
     el.className = 'skill-tag';
+    if (idx === 0) el.classList.add('skill-tag-edge-left');
+    if (idx === skills.length - 1) el.classList.add('skill-tag-edge-right');
     el.textContent = s.name;
     el.dataset.tooltip = s.tip;
     list.appendChild(el);
@@ -332,6 +476,8 @@ if (progressBar) {
   const ctx=canvas.getContext('2d');
   if (!ctx) return;
   const COLORS=['#00f5ff','#ff00aa','#7b61ff','#39ff14'];
+  const pointsCount = UI_STATE.motionMode === 'full' ? 95 : 36;
+  const linkDistance = UI_STATE.motionMode === 'full' ? 95 : 58;
   let W,H,DPR=1,mouse={x:-999,y:-999};
   const pts=[];
   function resize(){
@@ -339,7 +485,7 @@ if (progressBar) {
     canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);
   }
   window.addEventListener('resize',resize,{passive:true});resize();
-  for(let i=0;i<65;i++) pts.push({
+  for(let i=0;i<pointsCount;i++) pts.push({
     x:Math.random()*W,y:Math.random()*H,
     vx:(Math.random()-.5)*.45,vy:(Math.random()-.5)*.45,
     r:Math.random()*2+.8,a:Math.random()*.45+.12,
@@ -349,16 +495,22 @@ if (progressBar) {
     ctx.clearRect(0,0,W,H);
     pts.forEach(p=>{
       const dx=p.x-mouse.x,dy=p.y-mouse.y,d=Math.sqrt(dx*dx+dy*dy);
-      if(d<130&&d>0){const f=(130-d)/130*.9;p.vx+=(dx/d)*f*.04;p.vy+=(dy/d)*f*.04;}
+      const mouseRadius = UI_STATE.motionMode === 'full' ? 180 : 120;
+      if (d < mouseRadius && d > 0) {
+        const forceBase = UI_STATE.motionMode === 'full' ? 1.4 : 1;
+        const f = (mouseRadius - d) / mouseRadius * forceBase;
+        p.vx += (dx / d) * f * .08;
+        p.vy += (dy / d) * f * .08;
+      }
       p.vx*=.985;p.vy*=.985;p.x+=p.vx;p.y+=p.vy;p.age++;
       if(p.age>p.life||p.x<-20||p.x>W+20||p.y<-20||p.y>H+20){
         p.x=Math.random()*W;p.y=Math.random()*H;p.vx=(Math.random()-.5)*.45;p.vy=(Math.random()-.5)*.45;p.age=0;p.life=Math.random()*180+80;
       }
       ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
       ctx.fillStyle=p.color;ctx.globalAlpha=p.a*(1-p.age/p.life*.4);ctx.fill();
-      pts.forEach(q=>{
+      if (UI_STATE.motionMode === 'full') pts.forEach(q=>{
         const ddx=p.x-q.x,ddy=p.y-q.y,dd=Math.sqrt(ddx*ddx+ddy*ddy);
-        if(dd<85&&dd>0){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=p.color;ctx.globalAlpha=(1-dd/85)*.1;ctx.lineWidth=.5;ctx.stroke();}
+        if(dd<linkDistance&&dd>0){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=p.color;ctx.globalAlpha=(1-dd/linkDistance)*.1;ctx.lineWidth=.5;ctx.stroke();}
       });
     });
     ctx.globalAlpha=1;
@@ -490,6 +642,7 @@ function startNavLogoTyping() {
 function setAfterHeroState(nextAfterHero) {
   if (!navbar || nextAfterHero === isAfterHero) return;
   isAfterHero = nextAfterHero;
+  UI_STATE.isAfterHero = nextAfterHero;
   navbar.classList.toggle('after-hero', isAfterHero);
   if (isAfterHero) startNavLogoTyping();
   else resetNavLogoTyping();
@@ -517,9 +670,11 @@ function onScroll() {
 if (navbar) {
   if (!heroEl || heroEl.getBoundingClientRect().bottom < HERO_EXIT_THRESHOLD) {
     isAfterHero = false;
+    UI_STATE.isAfterHero = false;
     setAfterHeroState(true);
   } else {
     isAfterHero = true;
+    UI_STATE.isAfterHero = true;
     setAfterHeroState(false);
   }
   window.addEventListener('scroll', onScroll, {passive:true});
@@ -548,128 +703,340 @@ document.getElementById('langToggle')?.addEventListener('click', toggleLang);
 document.getElementById('langToggleMob')?.addEventListener('click', toggleLang);
 
 /* ══════════════════════════════════════════════
-   OFFLINE IDEA GENERATOR
+   DYNAMIC CONTENT + GENERATOR
 ══════════════════════════════════════════════ */
-const OFFLINE_IDEA_BANK = {
-  ru: {
-    starts: ['Vibe', 'Neon', 'Pulse', 'Flow', 'Orbit', 'Sprint', 'Signal', 'Pixel'],
-    nouns: ['Lab', 'Studio', 'Hub', 'Board', 'Forge', 'Grid', 'Space', 'Engine'],
-    audiences: [
-      'для фрилансеров',
-      'для локальных брендов',
-      'для креаторов',
-      'для экспертов и наставников',
-      'для небольших команд'
-    ],
-    goals: [
-      'быстро проверять спрос на идеи',
-      'собирать первые заявки без сложной настройки',
-      'запускать MVP за 1 вечер',
-      'показывать кейсы и собирать лиды',
-      'упрощать путь клиента до покупки'
-    ],
-    mechanics: [
-      'конструктор лендингов + мини-CRM',
-      'публичная витрина + автогенерация контента',
-      'канбан задач + AI-ассистент по приоритетам',
-      'умные брифы + генератор прототипов',
-      'каталог услуг + трекер воронки'
-    ],
-    stacks: [
-      'Stack: Vite, Vanilla JS, LocalStorage, Netlify',
-      'Stack: React, Supabase, Tailwind, Vercel',
-      'Stack: Next.js, PostgreSQL, Prisma, Docker',
-      'Stack: Vue, Firebase, Cloud Functions, Hosting',
-      'Stack: SvelteKit, SQLite, Drizzle, Fly.io'
-    ]
-  },
-  en: {
-    starts: ['Vibe', 'Neon', 'Pulse', 'Flow', 'Orbit', 'Sprint', 'Signal', 'Pixel'],
-    nouns: ['Lab', 'Studio', 'Hub', 'Board', 'Forge', 'Grid', 'Space', 'Engine'],
-    audiences: [
-      'for freelancers',
-      'for local brands',
-      'for creators',
-      'for coaches and experts',
-      'for small product teams'
-    ],
-    goals: [
-      'validate demand fast',
-      'collect first leads with minimal setup',
-      'ship an MVP in one evening',
-      'showcase case studies and convert traffic',
-      'shorten the path from visit to purchase'
-    ],
-    mechanics: [
-      'a landing page builder + mini CRM',
-      'a public showcase + auto content generation',
-      'a kanban planner + AI priority assistant',
-      'smart briefs + rapid prototype generator',
-      'a service catalog + funnel tracker'
-    ],
-    stacks: [
-      'Stack: Vite, Vanilla JS, LocalStorage, Netlify',
-      'Stack: React, Supabase, Tailwind, Vercel',
-      'Stack: Next.js, PostgreSQL, Prisma, Docker',
-      'Stack: Vue, Firebase, Cloud Functions, Hosting',
-      'Stack: SvelteKit, SQLite, Drizzle, Fly.io'
-    ]
-  }
-};
-
-function pickOne(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+async function loadContentData() {
+  const [projects, faq, signals, skills] = await Promise.all([
+    loadJson('/content/projects.json'),
+    loadJson('/content/faq.json'),
+    loadJson('/content/signals.json'),
+    loadJson('/content/skills.json')
+  ]);
+  CONTENT.projects = Array.isArray(projects?.items) ? projects.items : [];
+  CONTENT.faq = Array.isArray(faq?.items) ? faq.items : [];
+  CONTENT.signals = Array.isArray(signals?.items) ? signals.items : [];
+  CONTENT.skills = Array.isArray(skills?.items) ? skills.items : [];
 }
 
-function buildOfflineIdea(lang) {
-  const bank = OFFLINE_IDEA_BANK[lang] || OFFLINE_IDEA_BANK.en;
-  const name = `${pickOne(bank.starts)} ${pickOne(bank.nouns)}`;
-  const idea = lang === 'ru'
-    ? `${pickOne(bank.mechanics)} ${pickOne(bank.audiences)}, чтобы ${pickOne(bank.goals)}.`
-    : `${pickOne(bank.mechanics)} ${pickOne(bank.audiences)} to ${pickOne(bank.goals)}.`;
-  const stack = pickOne(bank.stacks);
-  return [name, idea, stack];
+function renderSignals() {
+  const holder = document.getElementById('signalsTicker');
+  if (!holder) return;
+  const lines = CONTENT.signals.length
+    ? CONTENT.signals.map(item => currentLang === 'ru' ? item.ru : item.en)
+    : [currentLang === 'ru' ? '[signal] Обновлений пока нет' : '[signal] No updates yet'];
+  const row = [...lines, ...lines].map(line => `<span class="signal-item">${escapeHtml(line)}</span>`).join('');
+  holder.innerHTML = `<div class="signals-track">${row}</div>`;
 }
 
-document.getElementById('ideaBtn')?.addEventListener('click', async () => {
-  const btn     = document.getElementById('ideaBtn');
-  const icon    = document.getElementById('ideaBtnIcon');
-  const result  = document.getElementById('ideaResult');
-  const textEl  = document.getElementById('ideaText');
-  if (!btn || !icon || !result || !textEl) return;
-  const labelEl = btn.querySelector('[data-i18n]');
-  const t       = LANG[currentLang];
+function renderProcessLog() {
+  const box = document.getElementById('processLog');
+  if (!box) return;
+  const t = LANG[currentLang];
+  const lines = t['process-log-lines']
+    .map(line => `<p class="process-line">${escapeHtml(line)}</p>`)
+    .join('');
+  box.innerHTML = `
+    <div class="process-head">
+      <span class="status-chip status-chip-build">BUILDING</span>
+      <span>${escapeHtml(t['process-log-title'])}</span>
+    </div>
+    <div class="process-lines">${lines}</div>
+    <div class="process-kpi-row" id="processKpis">
+      <div class="process-kpi"><span class="process-kpi-num" data-target="96">00</span>% ${escapeHtml(t['process-kpi-1'])}</div>
+      <div class="process-kpi"><span class="process-kpi-num" data-target="94">00</span>% ${escapeHtml(t['process-kpi-2'])}</div>
+      <div class="process-kpi"><span class="process-kpi-num" data-target="98">00</span>% ${escapeHtml(t['process-kpi-3'])}</div>
+    </div>
+  `;
+  const nums = box.querySelectorAll('.process-kpi-num[data-target]');
+  nums.forEach(el => {
+    const target = Number(el.dataset.target) || 0;
+    const t0 = performance.now();
+    const dur = 900;
+    (function step(now){
+      const p = Math.min((now - t0) / dur, 1);
+      el.textContent = String(Math.floor(target * p)).padStart(2, '0');
+      if (p < 1) requestAnimationFrame(step);
+    })(t0);
+  });
+}
 
-  btn.disabled = true;
-  icon.innerHTML = '<span class="spin">◌</span>';
-  if (labelEl) labelEl.textContent = t['idea-loading'];
-  result.classList.remove('show');
+function renderCaseMetrics() {
+  const holder = document.getElementById('caseMetrics');
+  if (!holder) return;
+  const t = LANG[currentLang];
+  const total = CONTENT.projects.length || 2;
+  const live = CONTENT.projects.filter(item => item.status === 'ONLINE' || item.status === 'DEPLOYED').length || 2;
+  holder.innerHTML = `
+    <article class="metric-card reveal"><div class="metric-value">${String(total).padStart(2, '0')}</div><div class="metric-label">${escapeHtml(t['metrics-total'])}</div></article>
+    <article class="metric-card reveal"><div class="metric-value">${String(live).padStart(2, '0')}</div><div class="metric-label">${escapeHtml(t['metrics-live'])}</div></article>
+    <article class="metric-card reveal"><div class="metric-value">${escapeHtml(t['metrics-cycle-value'])}</div><div class="metric-label">${escapeHtml(t['metrics-cycle'])}</div></article>
+  `;
+}
 
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 550 + Math.random() * 450));
-    const lines = buildOfflineIdea(currentLang);
-    textEl.innerHTML = lines.map((l, i) => {
-      const clean = l.replace(/^\d+[\)\.]\s*/, '').trim();
-      if (i === 0) return `<strong>${clean}</strong>`;
-      if (i === 2) return `<span style="color:var(--cyan);font-size:.7rem">${clean}</span>`;
-      return clean;
-    }).join('<br>');
-    result.classList.add('show');
-  } catch(e) {
-    textEl.innerHTML = currentLang === 'ru'
-      ? '<span style="color:var(--magenta)">Ошибка генерации. Попробуйте ещё раз.</span>'
-      : '<span style="color:var(--magenta)">Generation error. Please try again.</span>';
-    result.classList.add('show');
+function renderProjects() {
+  const grid = document.getElementById('projectsGrid');
+  if (!grid) return;
+  if (!CONTENT.projects.length) {
+    grid.innerHTML = `<p class="project-empty">${currentLang === 'ru' ? 'Кейсы загружаются...' : 'Cases are loading...'}</p>`;
+    return;
+  }
+  grid.innerHTML = CONTENT.projects.map((project, idx) => {
+    const accent = project.accent === 'violet' ? '#a855f7' : '#00f5ff';
+    const type = getLocalized(project.type);
+    const summary = getLocalized(project.summary);
+    const role = getLocalized(project.role);
+    const host = domainFromUrl(project.url);
+    const status = project.status || 'ONLINE';
+    const preview = UI_STATE.motionMode === 'full'
+      ? `<iframe src="${escapeHtml(project.preview || project.url)}" loading="lazy" title="${escapeHtml(project.name)}" sandbox="allow-same-origin allow-scripts"></iframe>`
+      : `<div class="project-preview-lite">${escapeHtml(host)}</div>`;
+    return `
+      <article class="project-card reveal" style="--project-accent:${accent}">
+        <div class="project-preview">${preview}</div>
+        <div class="project-top">
+          <p class="project-num">PROJECT - ${String(idx + 1).padStart(2, '0')}</p>
+          <span class="status-chip ${statusClass(status)}">${escapeHtml(status)}</span>
+        </div>
+        <h3 class="project-title">${escapeHtml(project.name)}</h3>
+        <span class="project-type">${escapeHtml(type)}</span>
+        <p class="project-desc">${escapeHtml(summary)}</p>
+        <p class="project-role">${escapeHtml(role)}</p>
+        <div class="project-actions">
+          <button class="project-btn" data-case-open="${escapeHtml(project.id)}">${escapeHtml(LANG[currentLang]['project-details'])}</button>
+          <a class="project-link" href="${escapeHtml(project.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(LANG[currentLang]['project-open'])} ${escapeHtml(host)}</a>
+        </div>
+      </article>
+    `;
+  }).join('');
+  grid.querySelectorAll('[data-case-open]').forEach(btn => {
+    btn.addEventListener('click', () => openCaseDrawer(btn.dataset.caseOpen));
+  });
+}
+
+function renderFaq() {
+  const box = document.getElementById('faqList');
+  if (!box) return;
+  const items = CONTENT.faq.length ? CONTENT.faq : [{
+    q_ru: 'Q> Сколько занимает разработка?',
+    a_ru: 'A> Обычно 1-3 дня. В зависимости от сложности проекта.',
+    q_en: 'Q> How long does development take?',
+    a_en: 'A> Usually 3-5 days.'
+  }];
+
+  function decorateFaqMvp(text) {
+    const safeText = escapeHtml(text ?? '');
+    const tip = escapeHtml(LANG[currentLang]['faq-mvp-tip'] || '');
+    if (!tip) return safeText;
+    return safeText.replace(
+      /\bMVP\b/g,
+      `<span class="skill-tag faq-mvp-tag" data-tooltip="${tip}" aria-label="MVP">MVP</span>`
+    );
   }
 
-  btn.disabled = false;
-  icon.textContent = '✦';
-  if (labelEl) labelEl.textContent = t['idea-btn'];
+  box.innerHTML = items.map(item => {
+    const q = currentLang === 'ru' ? item.q_ru : item.q_en;
+    const a = currentLang === 'ru' ? item.a_ru : item.a_en;
+    return `<article class="faq-row"><p class="faq-q">${decorateFaqMvp(q)}</p><p class="faq-a">${decorateFaqMvp(a)}</p></article>`;
+  }).join('');
+}
+
+const caseDrawer = document.getElementById('caseDrawer');
+const caseBackdrop = document.getElementById('caseBackdrop');
+const caseClose = document.getElementById('caseClose');
+const caseDrawerType = document.getElementById('caseDrawerType');
+const caseDrawerTitle = document.getElementById('caseDrawerTitle');
+const caseDrawerSummary = document.getElementById('caseDrawerSummary');
+const caseDrawerRole = document.getElementById('caseDrawerRole');
+const caseDrawerChallenge = document.getElementById('caseDrawerChallenge');
+const caseDrawerSolution = document.getElementById('caseDrawerSolution');
+const caseDrawerOutcomes = document.getElementById('caseDrawerOutcomes');
+const caseDrawerStack = document.getElementById('caseDrawerStack');
+const caseDrawerLink = document.getElementById('caseDrawerLink');
+
+function drawerBlock(label, text) {
+  return `<span class="case-key">${escapeHtml(label)}</span><p>${escapeHtml(text)}</p>`;
+}
+
+function openCaseDrawer(caseId) {
+  if (!caseDrawer) return;
+  const project = CONTENT.projects.find(item => item.id === caseId);
+  if (!project) return;
+  caseDrawerType.textContent = getLocalized(project.type);
+  caseDrawerTitle.textContent = project.name;
+  caseDrawerSummary.textContent = getLocalized(project.summary);
+  caseDrawerRole.innerHTML = drawerBlock(LANG[currentLang]['case-role'], getLocalized(project.role));
+  caseDrawerChallenge.innerHTML = drawerBlock(LANG[currentLang]['case-challenge'], getLocalized(project.challenge));
+  caseDrawerSolution.innerHTML = drawerBlock(LANG[currentLang]['case-solution'], getLocalized(project.solution));
+  caseDrawerOutcomes.innerHTML = (project.outcomes || []).map(item => `<li>${escapeHtml(getLocalized(item))}</li>`).join('');
+  caseDrawerStack.innerHTML = (project.stack || []).map(item => `<span>${escapeHtml(item)}</span>`).join('');
+  if (caseDrawerLink) caseDrawerLink.href = project.url;
+  caseDrawer.classList.add('open');
+  caseDrawer.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCaseDrawer() {
+  if (!caseDrawer) return;
+  caseDrawer.classList.remove('open');
+  caseDrawer.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+caseClose?.addEventListener('click', closeCaseDrawer);
+caseBackdrop?.addEventListener('click', closeCaseDrawer);
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeCaseDrawer();
 });
 
-document.getElementById('ideaCloseBtn')?.addEventListener('click', () => {
-  document.getElementById('ideaResult')?.classList.remove('show');
-});
+const generatorForm = document.getElementById('generatorForm');
+const generatorInput = document.getElementById('generatorInput');
+const generatorTone = document.getElementById('generatorTone');
+const generatorRunBtn = document.getElementById('generatorRunBtn');
+const generatorEcho = document.getElementById('generatorEcho');
+const generatorOutput = document.getElementById('generatorOutput');
+const generatorPresets = document.getElementById('generatorPresets');
+let generatorRenderToken = 0;
+
+function generatorKeywords(lang) {
+  return lang === 'ru'
+    ? ['НАЗВАНИЕ:', 'СУТЬ:', 'ПРОБЛЕМА:', 'MVP:', 'СТЕК:', 'МОНЕТИЗАЦИЯ:']
+    : ['NAME:', 'CORE:', 'PROBLEM:', 'MVP:', 'STACK:', 'MONETIZATION:'];
+}
+
+function formatGeneratorLine(rawLine, lang) {
+  const line = rawLine.trimEnd();
+  if (!line) return '&nbsp;';
+  const upper = line.toUpperCase();
+  for (const key of generatorKeywords(lang)) {
+    if (upper.startsWith(key)) {
+      const head = line.slice(0, key.length);
+      const tail = line.slice(key.length).trimStart();
+      return `<span class="generator-key">${escapeHtml(head)}</span>${tail ? ` ${escapeHtml(tail)}` : ''}`;
+    }
+  }
+  return escapeHtml(line);
+}
+
+function renderGeneratorPresets() {
+  if (!generatorPresets) return;
+  const presets = LANG[currentLang]['generator-presets'];
+  generatorPresets.innerHTML = presets
+    .map(item => `<button type="button" class="preset-btn" data-preset="${escapeHtml(item)}">${escapeHtml(item)}</button>`)
+    .join('');
+  generatorPresets.querySelectorAll('[data-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!generatorInput) return;
+      generatorInput.value = btn.dataset.preset || '';
+      syncGeneratorEcho();
+      generatorInput.focus();
+    });
+  });
+}
+
+function setGeneratorOutputPlaceholder() {
+  if (!generatorOutput) return;
+  generatorOutput.innerHTML = `<span class="generator-output-placeholder">${escapeHtml(LANG[currentLang]['generator-output-placeholder'])}</span>`;
+}
+
+function syncGeneratorEcho() {
+  if (!generatorEcho) return;
+  generatorEcho.textContent = generatorInput?.value || LANG[currentLang]['generator-command-empty'];
+}
+
+function setGeneratorLoading(isLoading) {
+  if (!generatorRunBtn) return;
+  if (isLoading) UI_STATE.generatorState = 'loading';
+  else if (UI_STATE.generatorState === 'loading') UI_STATE.generatorState = 'idle';
+  generatorRunBtn.disabled = isLoading;
+  const label = generatorRunBtn.querySelector('[data-i18n]');
+  if (label) label.textContent = isLoading ? LANG[currentLang]['generator-running'] : LANG[currentLang]['generator-run'];
+}
+
+function syncGeneratorLanguage() {
+  if (!generatorForm) return;
+  syncGeneratorEcho();
+  renderGeneratorPresets();
+  if (UI_STATE.generatorState !== 'done' && UI_STATE.generatorState !== 'error') {
+    setGeneratorOutputPlaceholder();
+  }
+}
+
+async function typeGeneratorResult(text) {
+  if (!generatorOutput) return;
+  const token = ++generatorRenderToken;
+  const lines = text.replace(/\r/g, '').split('\n');
+  generatorOutput.innerHTML = '';
+  for (const line of lines) {
+    if (token !== generatorRenderToken) return;
+    const row = document.createElement('div');
+    row.innerHTML = formatGeneratorLine(line, currentLang);
+    generatorOutput.appendChild(row);
+    await new Promise(resolve => setTimeout(resolve, 40));
+  }
+}
+
+function showGeneratorError(message) {
+  if (!generatorOutput) return;
+  const prefix = LANG[currentLang]['generator-error-prefix'];
+  generatorOutput.innerHTML = `<span class="generator-error">${escapeHtml(`${prefix} ${message}`)}</span>`;
+}
+
+if (generatorForm && generatorInput && generatorRunBtn && generatorEcho && generatorOutput) {
+  syncGeneratorLanguage();
+  generatorInput.addEventListener('input', syncGeneratorEcho);
+  generatorForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (UI_STATE.generatorState === 'loading') return;
+    const niche = generatorInput.value.trim();
+    const tone = generatorTone?.value === 'detailed' ? 'detailed' : 'brief';
+    if (!niche || niche.length > 200) {
+      UI_STATE.generatorState = 'error';
+      showGeneratorError('niche must be 1-200 chars');
+      return;
+    }
+    generatorRenderToken += 1;
+    setGeneratorLoading(true);
+    generatorOutput.innerHTML = '<span class="generator-loading blink">█</span>';
+    try {
+      const response = await fetch('/api/generate-idea', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ niche, lang: currentLang, tone })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.error || `HTTP ${response.status}`);
+      const result = typeof data?.result === 'string' ? data.result.trim() : '';
+      if (!result) throw new Error('Empty result');
+      UI_STATE.generatorState = 'done';
+      await typeGeneratorResult(result);
+    } catch (error) {
+      UI_STATE.generatorState = 'error';
+      showGeneratorError(error instanceof Error ? error.message : 'Request failed');
+    } finally {
+      setGeneratorLoading(false);
+    }
+  });
+}
+
+const leadForm = document.getElementById('leadForm');
+const leadNiche = document.getElementById('leadNiche');
+const leadGoal = document.getElementById('leadGoal');
+const leadBudget = document.getElementById('leadBudget');
+
+if (leadForm && leadGoal && leadBudget) {
+  leadForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const niche = leadNiche?.value?.trim() || (currentLang === 'ru' ? 'Не указано' : 'Not specified');
+    const goal = leadGoal.options[leadGoal.selectedIndex]?.text || '';
+    const budget = leadBudget.options[leadBudget.selectedIndex]?.text || '';
+    const message = currentLang === 'ru'
+      ? `Новый бриф:%0A- Ниша: ${niche}%0A- Цель: ${goal}%0A- Бюджет/этап: ${budget}`
+      : `New brief:%0A- Niche: ${niche}%0A- Goal: ${goal}%0A- Budget/stage: ${budget}`;
+    const url = `https://t.me/lolyousee?text=${message}`;
+    const popup = window.open(url, '_blank', 'noopener');
+    if (!popup) window.location.href = url;
+  });
+}
 
 /* ══════════════════════════════════════════════
    CURSOR
@@ -721,24 +1088,52 @@ if (canUseCustomCursor && cursor && ring) {
 /* ══════════════════════════════════════════════
    REVEAL (clip-path)
 ══════════════════════════════════════════════ */
-if (!('IntersectionObserver' in window) || prefersReducedMotion) {
-  document.querySelectorAll('.reveal,.reveal-left').forEach(el => el.classList.add('visible'));
-} else {
-  const io = new IntersectionObserver(entries => {
-    entries.forEach((e, i) => {
-      if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 80);
-    });
-  }, {threshold:.08});
-  document.querySelectorAll('.reveal,.reveal-left').forEach(el => io.observe(el));
+let revealObserver = null;
+function observeRevealElements(root = document) {
+  const nodes = root.querySelectorAll('.reveal,.reveal-left');
+  if (!('IntersectionObserver' in window) || prefersReducedMotion) {
+    nodes.forEach(el => el.classList.add('visible'));
+    return;
+  }
+  if (!revealObserver) {
+    revealObserver = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 70);
+      });
+    }, {threshold:.12});
+  }
+  nodes.forEach(el => revealObserver.observe(el));
 }
+observeRevealElements(document);
 
 /* ══════════════════════════════════════════════
    GLITCH FLICKER
 ══════════════════════════════════════════════ */
 const heroName = document.querySelector('.hero-name');
+let lowPerformance = false;
+
+(function performanceProbe() {
+  if (!shouldUseHeavyHeroEffects) return;
+  const start = performance.now();
+  let frames = 0;
+  function frame(now) {
+    frames += 1;
+    if (now - start < 2200) return requestAnimationFrame(frame);
+    const fps = frames / ((now - start) / 1000);
+    if (fps < 50) {
+      lowPerformance = true;
+      UI_STATE.motionMode = 'minimal';
+      document.documentElement.dataset.motion = 'minimal';
+    }
+  }
+  requestAnimationFrame(frame);
+})();
+
 if (shouldUseHeavyHeroEffects && heroName) {
   setInterval(() => {
-    if (Math.random() < .3) {
+    const inHeroZone = window.scrollY <= window.innerHeight * 0.8;
+    if (!inHeroZone || lowPerformance) return;
+    if (Math.random() < .25) {
       heroName.style.textShadow = `${(Math.random()-.5)*8}px 0 #00f5ff,${(Math.random()-.5)*8}px 0 #ff00aa`;
       const s = heroName.querySelector('.see');
       if (s) s.style.textShadow = `${(Math.random()-.5)*8}px 0 #7b61ff`;
@@ -747,10 +1142,29 @@ if (shouldUseHeavyHeroEffects && heroName) {
         const ss=heroName.querySelector('.see');if(ss)ss.style.textShadow='';
       }, 80);
     }
-  }, 2000);
+  }, 2400);
 }
 
 /* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
-buildSkills('ru');
+applyLang('ru');
+loadContentData().then(() => {
+  buildSkills(currentLang);
+  renderSignals();
+  renderProcessLog();
+  renderProjects();
+  renderCaseMetrics();
+  renderFaq();
+  renderGeneratorPresets();
+  observeRevealElements(document);
+}).catch(() => {
+  buildSkills(currentLang);
+  renderSignals();
+  renderProcessLog();
+  renderProjects();
+  renderCaseMetrics();
+  renderFaq();
+  renderGeneratorPresets();
+  observeRevealElements(document);
+});

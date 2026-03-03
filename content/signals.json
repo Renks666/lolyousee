@@ -1,0 +1,16 @@
+﻿{
+  "items": [
+    {
+      "ru": "[2026-02-18] EASTLANE: обновлен путь до заявки, ускорен checkout flow",
+      "en": "[2026-02-18] EASTLANE: lead path updated, checkout flow accelerated"
+    },
+    {
+      "ru": "[2026-02-24] АЛЕТЕЙЯ: усилены экспертные блоки и структура доверия",
+      "en": "[2026-02-24] ALETHEIA: expert blocks and trust architecture improved"
+    },
+    {
+      "ru": "[2026-02-28] Generator: расширен fallback pipeline и обработка ошибок",
+      "en": "[2026-02-28] Generator: fallback pipeline and error handling expanded"
+    }
+  ]
+}

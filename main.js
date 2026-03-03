@@ -813,6 +813,38 @@ function renderProjects() {
   });
 }
 
+function syncFaqRowHeight(row) {
+  const answer = row?.querySelector('.faq-answer');
+  if (!answer) return;
+  if (row.classList.contains('is-open')) {
+    answer.style.maxHeight = `${answer.scrollHeight}px`;
+  } else {
+    answer.style.maxHeight = '0px';
+  }
+}
+
+function syncFaqLayout() {
+  document.querySelectorAll('#faqList .faq-row').forEach(syncFaqRowHeight);
+}
+
+function bindFaqAccordion(box) {
+  const rows = box.querySelectorAll('.faq-row');
+  rows.forEach(row => {
+    const toggle = row.querySelector('.faq-toggle');
+    const answer = row.querySelector('.faq-answer');
+    if (!toggle || !answer) return;
+    syncFaqRowHeight(row);
+    toggle.addEventListener('click', () => {
+      const isOpen = row.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      answer.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+      syncFaqRowHeight(row);
+    });
+  });
+}
+
+window.addEventListener('resize', syncFaqLayout, { passive: true });
+
 function renderFaq() {
   const box = document.getElementById('faqList');
   if (!box) return;
@@ -833,11 +865,24 @@ function renderFaq() {
     );
   }
 
-  box.innerHTML = items.map(item => {
+  box.innerHTML = items.map((item, idx) => {
     const q = currentLang === 'ru' ? item.q_ru : item.q_en;
     const a = currentLang === 'ru' ? item.a_ru : item.a_en;
-    return `<article class="faq-row"><p class="faq-q">${decorateFaqMvp(q)}</p><p class="faq-a">${decorateFaqMvp(a)}</p></article>`;
+    const answerId = `faq-answer-${idx + 1}`;
+    return `
+      <article class="faq-row">
+        <button class="faq-toggle" type="button" aria-expanded="false" aria-controls="${answerId}">
+          <span class="faq-q">${decorateFaqMvp(q)}</span>
+          <span class="faq-arrow" aria-hidden="true"></span>
+        </button>
+        <div class="faq-answer" id="${answerId}" aria-hidden="true">
+          <p class="faq-a">${decorateFaqMvp(a)}</p>
+        </div>
+      </article>
+    `;
   }).join('');
+  bindFaqAccordion(box);
+  requestAnimationFrame(syncFaqLayout);
 }
 
 const caseDrawer = document.getElementById('caseDrawer');

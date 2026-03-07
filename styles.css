@@ -6,7 +6,7 @@
   --glow-see:  0 0 10px #7b61ff,0 0 30px #7b61ff44;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:84px}
+html{scroll-behavior:smooth;scroll-padding-top:0}
 body{background:var(--dark);color:var(--text);font-family:'Share Tech Mono',monospace;overflow-x:hidden;cursor:auto}
 html.has-custom-cursor body{cursor:none}
 a:focus-visible,
@@ -128,7 +128,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   .nav-right .lang-toggle,.nav-right .nav-btn-primary{display:none!important}
   .burger{display:flex}
   .mobile-menu{max-height:calc(100svh - 64px);overflow-y:auto}
-  section[id]{scroll-margin-top:74px}
+  section[id]{scroll-margin-top:0}
 }
 
 main{position:relative;z-index:2}
@@ -205,7 +205,7 @@ main{position:relative;z-index:2}
 
 /* ══ SECTIONS COMMON ══ */
 section{padding:clamp(3rem,8vw,7rem) clamp(1.5rem,6vw,7rem)}
-section[id]{scroll-margin-top:84px}
+section[id]{scroll-margin-top:0}
 .section-label{font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;color:var(--magenta);margin-bottom:.75rem}
 .section-label::before{content:'// ';opacity:.5}
 .section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5vw,4.5rem);line-height:1;color:#fff;margin-bottom:2.5rem}
@@ -621,4 +621,105 @@ html[data-motion='minimal'] .project-preview iframe{display:none}
 }
 @media (prefers-reduced-motion: reduce){
   .generator-soon-marquee{animation:none}
+}
+
+/* Generator output wrapper */
+.generator-output-wrapper {
+  position: relative;
+}
+
+.generator-output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.output-label {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--color-muted, rgba(200,216,232,.52));
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+}
+
+/* COPY кнопка */
+.btn-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--color-border, rgba(255,255,255,.18));
+  color: var(--color-muted, rgba(200,216,232,.7));
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.btn-copy:hover {
+  border-color: var(--color-accent, var(--cyan));
+  color: var(--color-accent, var(--cyan));
+}
+
+.btn-copy.copied {
+  border-color: var(--color-accent, var(--cyan));
+  color: var(--color-accent, var(--cyan));
+  background: rgba(0, 245, 255, 0.08);
+}
+
+.copy-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* CTA кнопка */
+.generator-cta {
+  margin-top: 20px;
+}
+
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: 1px solid var(--color-accent, var(--cyan));
+  color: var(--color-accent, var(--cyan));
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding: 10px 20px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent, var(--cyan));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.btn-cta:hover {
+  color: #000;
+  background: var(--color-accent, var(--cyan));
+}
+
+.btn-cta:hover .cta-arrow {
+  transform: translate(2px, -2px);
+}
+
+.cta-arrow {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+  display: inline-block;
 }

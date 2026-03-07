@@ -583,6 +583,34 @@ const navLogoTyped = document.getElementById('navLogoTyped');
 const heroEl       = document.querySelector('.hero');
 const navLinks     = document.querySelectorAll('.nav-link');
 const sections     = document.querySelectorAll('section[id]');
+const NAV_OFFSET_GAP = -8;
+const navTargetIds = new Set(
+  [...navLinks]
+    .map(link => link.getAttribute('href') || '')
+    .filter(href => href.startsWith('#'))
+    .map(href => href.slice(1))
+);
+
+function getNavSections() {
+  return [...sections].filter(section => navTargetIds.has(section.id));
+}
+
+function getNavOffset() {
+  return (navbar?.offsetHeight || 64) + NAV_OFFSET_GAP;
+}
+
+function setActiveNavLink(targetId = '') {
+  navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${targetId}`));
+}
+
+function scrollToNavTarget(targetId, behavior = 'smooth') {
+  if (!targetId || !navTargetIds.has(targetId)) return false;
+  const target = document.getElementById(targetId);
+  if (!target) return false;
+  const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - getNavOffset());
+  window.scrollTo({ top, behavior });
+  return true;
+}
 
 const NAV_LOGO_TEXT = 'LOLYOUSEE';
 const HERO_EXIT_THRESHOLD = 80;
@@ -666,12 +694,43 @@ function onScroll() {
     setAfterHeroState(true);
   }
 
-  let cur = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 140) cur = s.id; });
-  navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+  const navSections = getNavSections();
+  if (!navSections.length) {
+    setActiveNavLink('');
+    return;
+  }
+
+  const boundary = window.scrollY + getNavOffset();
+  const firstSection = navSections[0];
+  if (boundary < firstSection.offsetTop) {
+    setActiveNavLink('');
+    return;
+  }
+
+  let currentId = navSections[navSections.length - 1].id;
+  for (const section of navSections) {
+    if (boundary >= section.offsetTop) currentId = section.id;
+    else break;
+  }
+  setActiveNavLink(currentId);
 }
 
 if (navbar) {
+  navLinks.forEach(link => {
+    link.addEventListener('click', event => {
+      const href = link.getAttribute('href') || '';
+      if (!href.startsWith('#')) return;
+      const targetId = href.slice(1);
+      if (!targetId || !navTargetIds.has(targetId)) return;
+      event.preventDefault();
+      if (!scrollToNavTarget(targetId, 'smooth')) return;
+      if (window.location.hash !== `#${targetId}`) {
+        history.replaceState(null, '', `#${targetId}`);
+      }
+      setActiveNavLink(targetId);
+    });
+  });
+
   if (!heroEl || heroEl.getBoundingClientRect().bottom < HERO_EXIT_THRESHOLD) {
     isAfterHero = false;
     UI_STATE.isAfterHero = false;
@@ -682,7 +741,20 @@ if (navbar) {
     setAfterHeroState(false);
   }
   window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('hashchange', () => {
+    const targetId = window.location.hash.replace('#', '');
+    if (!targetId || !navTargetIds.has(targetId)) return;
+    if (scrollToNavTarget(targetId, 'smooth')) onScroll();
+  });
   onScroll();
+
+  const initialHashId = window.location.hash.replace('#', '');
+  if (initialHashId && navTargetIds.has(initialHashId)) {
+    requestAnimationFrame(() => {
+      if (scrollToNavTarget(initialHashId, 'auto')) onScroll();
+    });
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -1092,6 +1164,10 @@ if (!isGeneratorSoon && generatorForm && generatorInput && generatorRunBtn && ge
     generatorRenderToken += 1;
     setGeneratorLoading(true);
     generatorOutput.textContent = '// Генерирую...';
+    const btnCopy = document.getElementById('btn-copy');
+    const cta = document.getElementById('generator-cta');
+    if (btnCopy) btnCopy.style.display = 'none';
+    if (cta) cta.style.display = 'none';
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
@@ -1103,6 +1179,24 @@ if (!isGeneratorSoon && generatorForm && generatorInput && generatorRunBtn && ge
       if (!data || typeof data !== 'object') throw new Error('Пустой ответ');
       UI_STATE.generatorState = 'done';
       await typeGeneratorResult(formatIdeaResult(data));
+
+      const btnCopy = document.getElementById('btn-copy');
+      if (btnCopy) btnCopy.style.display = 'flex';
+
+      const cta = document.getElementById('generator-cta');
+      const btnCta = document.getElementById('btn-cta');
+      if (cta && btnCta) {
+        cta.style.display = 'block';
+        const ideaName = data?.name || 'идея из генератора';
+        const ideaTagline = data?.tagline || '';
+        const tgMessage = encodeURIComponent(
+          `Привет! Сгенерировал идею через твой генератор:\n\n` +
+          `Проект: ${ideaName}\n` +
+          `${ideaTagline}\n\n` +
+          `Хочу обсудить реализацию.`
+        );
+        btnCta.href = `https://t.me/lolyousee?text=${tgMessage}`;
+      }
     } catch (error) {
       UI_STATE.generatorState = 'error';
       showGeneratorError(error instanceof Error ? error.message : 'Request failed');
@@ -1111,6 +1205,44 @@ if (!isGeneratorSoon && generatorForm && generatorInput && generatorRunBtn && ge
     }
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnCopy = document.getElementById('btn-copy');
+  if (!btnCopy) return;
+
+  btnCopy.addEventListener('click', async () => {
+    const output = document.getElementById('generatorOutput');
+    if (!output) return;
+
+    const text = output.innerText || output.textContent;
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+
+    const icon = btnCopy.querySelector('.copy-icon');
+    const label = btnCopy.querySelector('.copy-text');
+    btnCopy.classList.add('copied');
+    if (icon) icon.textContent = '✓';
+    if (label) label.textContent = 'COPIED';
+
+    setTimeout(() => {
+      btnCopy.classList.remove('copied');
+      if (icon) icon.textContent = '⎘';
+      if (label) label.textContent = 'COPY';
+    }, 2000);
+  });
+});
 
 const leadForm = document.getElementById('leadForm');
 const leadNiche = document.getElementById('leadNiche');

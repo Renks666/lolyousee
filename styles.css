@@ -679,6 +679,10 @@ html[data-motion='minimal'] .project-preview iframe{display:none}
 /* CTA кнопка */
 .generator-cta {
   margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .btn-cta {
@@ -714,12 +718,14 @@ html[data-motion='minimal'] .project-preview iframe{display:none}
   background: var(--color-accent, var(--cyan));
 }
 
-.btn-cta:hover .cta-arrow {
-  transform: translate(2px, -2px);
-}
+@media (max-width: 640px) {
+  .generator-cta {
+    gap: 8px;
+  }
 
-.cta-arrow {
-  font-size: 14px;
-  transition: transform 0.2s ease;
-  display: inline-block;
+  .btn-cta,
+  .btn-copy {
+    width: 100%;
+    justify-content: center;
+  }
 }

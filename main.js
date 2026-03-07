@@ -1186,7 +1186,7 @@ if (!isGeneratorSoon && generatorForm && generatorInput && generatorRunBtn && ge
       const cta = document.getElementById('generator-cta');
       const btnCta = document.getElementById('btn-cta');
       if (cta && btnCta) {
-        cta.style.display = 'block';
+        cta.style.display = 'flex';
         const ideaName = data?.name || 'идея из генератора';
         const ideaTagline = data?.tagline || '';
         const tgMessage = encodeURIComponent(
@@ -1238,7 +1238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       btnCopy.classList.remove('copied');
-      if (icon) icon.textContent = '⎘';
+      if (icon) icon.textContent = '';
       if (label) label.textContent = 'COPY';
     }, 2000);
   });

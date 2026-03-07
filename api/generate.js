@@ -34,8 +34,17 @@ export default async function handler(req, res) {
     }
 
     const text = data.content[0].text;
-    const result = JSON.parse(text);
-    res.status(200).json(result);
+
+    // Убираем markdown-обёртку если есть
+    const clean = text.replace(/```json|```/g, '').trim();
+
+    try {
+      const result = JSON.parse(clean);
+      res.status(200).json(result);
+    } catch (parseErr) {
+      // Временно — вернём сырой текст чтобы увидеть что пришло
+      res.status(500).json({ error: 'JSON parse failed', raw: clean });
+    }
 
   } catch (err) {
     res.status(500).json({ error: 'Ошибка генерации' });

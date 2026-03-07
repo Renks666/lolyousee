@@ -33,7 +33,7 @@
     },
     {
       "id": "aletheia",
-      "name": "АЛЕТЕЙЯ",
+      "name": {"ru": "АЛЕТЕЙЯ", "en": "ALETHEIA"},
       "type": {"ru": "Legal Tech", "en": "Legal Tech"},
       "url": "https://aletheia-weld.vercel.app/",
       "preview": "https://aletheia-weld.vercel.app/",

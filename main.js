@@ -77,6 +77,7 @@ const LANG = {
     'bs-s5-deliverable':'Деплой, аналитика, SEO/итерации',
     'bs-s5-eastlane':   'Запуск на Vercel и оптимизация пути до покупки',
     'bs-s5-aletheia':   'Публикация, позиционирование, расширение охвата',
+    'brand-aletheia':   'АЛЕТЕЙЯ',
     'signals-label':    'Signal Feed',
     'projects-label':   'Work',
     'projects-title':   'МОИ ПРОЕКТЫ',
@@ -113,8 +114,24 @@ const LANG = {
     'generator-output-placeholder': '// Введи нишу - получишь название, MVP-фичи и стек',
     'generator-run':    'RUN ->',
     'generator-running':'Running...',
+    'generator-copy':   'СКОПИРОВАТЬ',
+    'generator-copied': 'СКОПИРОВАНО',
     'generator-command-empty': '...',
-    'generator-error-prefix': '// Error:',
+    'generator-error-prefix': '// Ошибка:',
+    'generator-loading': '// Генерирую...',
+    'generator-empty-response': 'Пустой ответ',
+    'generator-fallback-name': 'идея из генератора',
+    'generator-label-name': '// Название:',
+    'generator-label-idea': '// Идея:',
+    'generator-label-mvp': 'MVP фичи:',
+    'generator-label-stack': 'Стек:',
+    'generator-label-monetization': 'Монетизация:',
+    'generator-label-audience': 'Аудитория:',
+    'generator-telegram-intro': 'Привет! Сгенерировал идею через твой генератор:',
+    'generator-telegram-project': 'Проект:',
+    'generator-telegram-discuss': 'Хочу обсудить реализацию.',
+    'generator-telegram-output': '--- FULL OUTPUT ---',
+    'generator-cta':    '→ РЕАЛИЗОВАТЬ ИДЕЮ',
     'generator-tone-brief': 'Brief',
     'generator-tone-detailed': 'Detailed',
     'generator-presets': ['Legal Tech', 'E-commerce', 'Creator Economy', 'Local Services'],
@@ -193,6 +210,7 @@ const LANG = {
     'bs-s5-deliverable':'Deployment, analytics, SEO, iteration loop',
     'bs-s5-eastlane':   'Launched on Vercel and optimized the purchase path',
     'bs-s5-aletheia':   'Published, positioned, and expanded audience reach',
+    'brand-aletheia':   'ALETHEIA',
     'signals-label':    'Signal Feed',
     'projects-label':   'Work',
     'projects-title':   'MY PROJECTS',
@@ -229,8 +247,24 @@ const LANG = {
     'generator-output-placeholder': '// Enter a niche to get a name, MVP features, and stack',
     'generator-run':    'RUN ->',
     'generator-running':'Running...',
+    'generator-copy':   'COPY',
+    'generator-copied': 'COPIED',
     'generator-command-empty': '...',
     'generator-error-prefix': '// Error:',
+    'generator-loading': '// Generating...',
+    'generator-empty-response': 'Empty response',
+    'generator-fallback-name': 'generated idea',
+    'generator-label-name': '// Name:',
+    'generator-label-idea': '// Idea:',
+    'generator-label-mvp': 'MVP features:',
+    'generator-label-stack': 'Stack:',
+    'generator-label-monetization': 'Monetization:',
+    'generator-label-audience': 'Audience:',
+    'generator-telegram-intro': 'Hi! I generated an idea with your generator:',
+    'generator-telegram-project': 'Project:',
+    'generator-telegram-discuss': 'I want to discuss implementation.',
+    'generator-telegram-output': '--- FULL OUTPUT ---',
+    'generator-cta':    '→ IMPLEMENT IDEA',
     'generator-tone-brief': 'Brief',
     'generator-tone-detailed': 'Detailed',
     'generator-presets': ['Legal Tech', 'E-commerce', 'Creator Economy', 'Local Services'],
@@ -858,13 +892,14 @@ function renderProjects() {
   }
   grid.innerHTML = CONTENT.projects.map((project, idx) => {
     const accent = project.accent === 'violet' ? '#a855f7' : '#00f5ff';
+    const projectName = getLocalized(project.name);
     const type = getLocalized(project.type);
     const summary = getLocalized(project.summary);
     const role = getLocalized(project.role);
     const host = domainFromUrl(project.url);
     const status = project.status || 'ONLINE';
     const preview = UI_STATE.motionMode === 'full'
-      ? `<iframe src="${escapeHtml(project.preview || project.url)}" loading="lazy" title="${escapeHtml(project.name)}" sandbox="allow-same-origin allow-scripts"></iframe>`
+      ? `<iframe src="${escapeHtml(project.preview || project.url)}" loading="lazy" title="${escapeHtml(projectName)}" sandbox="allow-same-origin allow-scripts"></iframe>`
       : `<div class="project-preview-lite">${escapeHtml(host)}</div>`;
     return `
       <article class="project-card reveal" style="--project-accent:${accent}">
@@ -873,7 +908,7 @@ function renderProjects() {
           <p class="project-num">PROJECT - ${String(idx + 1).padStart(2, '0')}</p>
           <span class="status-chip ${statusClass(status)}">${escapeHtml(status)}</span>
         </div>
-        <h3 class="project-title">${escapeHtml(project.name)}</h3>
+        <h3 class="project-title">${escapeHtml(projectName)}</h3>
         <span class="project-type">${escapeHtml(type)}</span>
         <p class="project-desc">${escapeHtml(summary)}</p>
         <p class="project-role">${escapeHtml(role)}</p>
@@ -983,7 +1018,7 @@ function openCaseDrawer(caseId) {
   const project = CONTENT.projects.find(item => item.id === caseId);
   if (!project) return;
   caseDrawerType.textContent = getLocalized(project.type);
-  caseDrawerTitle.textContent = project.name;
+  caseDrawerTitle.textContent = getLocalized(project.name);
   caseDrawerSummary.textContent = getLocalized(project.summary);
   caseDrawerRole.innerHTML = drawerBlock(LANG[currentLang]['case-role'], getLocalized(project.role));
   caseDrawerChallenge.innerHTML = drawerBlock(LANG[currentLang]['case-challenge'], getLocalized(project.challenge));
@@ -1097,10 +1132,20 @@ function setGeneratorLoading(isLoading) {
   if (label) label.textContent = isLoading ? LANG[currentLang]['generator-running'] : LANG[currentLang]['generator-run'];
 }
 
+function syncGeneratorCopyLabel() {
+  const btnCopy = document.getElementById('btn-copy');
+  if (!btnCopy) return;
+  const label = btnCopy.querySelector('.copy-text');
+  if (!label) return;
+  const key = btnCopy.classList.contains('copied') ? 'generator-copied' : 'generator-copy';
+  label.textContent = LANG[currentLang][key] || (key === 'generator-copied' ? 'COPIED' : 'COPY');
+}
+
 function syncGeneratorLanguage() {
   if (!generatorForm) return;
   syncGeneratorEcho();
   renderGeneratorPresets();
+  syncGeneratorCopyLabel();
   if (UI_STATE.generatorState !== 'done' && UI_STATE.generatorState !== 'error') {
     setGeneratorOutputPlaceholder();
   }
@@ -1122,10 +1167,11 @@ async function typeGeneratorResult(text) {
 
 function showGeneratorError(message) {
   if (!generatorOutput) return;
-  generatorOutput.innerHTML = `<span class="generator-error">${escapeHtml(`// Ошибка: ${message}`)}</span>`;
+  generatorOutput.innerHTML = `<span class="generator-error">${escapeHtml(`${LANG[currentLang]['generator-error-prefix']} ${message}`)}</span>`;
 }
 
 function formatIdeaResult(data) {
+  const t = LANG[currentLang];
   const name = typeof data?.name === 'string' ? data.name.trim() : '';
   const tagline = typeof data?.tagline === 'string' ? data.tagline.trim() : '';
   const mvp = Array.isArray(data?.mvp_features) ? data.mvp_features.filter(Boolean) : [];
@@ -1134,19 +1180,40 @@ function formatIdeaResult(data) {
   const audience = typeof data?.target_audience === 'string' ? data.target_audience.trim() : '';
 
   const lines = [
-    `// Название: ${name || '—'}`,
-    `// Идея: ${tagline || '—'}`,
+    `${t['generator-label-name']} ${name || '—'}`,
+    `${t['generator-label-idea']} ${tagline || '—'}`,
     '',
-    'MVP фичи:',
+    t['generator-label-mvp'],
     ...(mvp.length ? mvp.map(item => `  → ${String(item)}`) : ['  → —']),
     '',
-    `Стек: ${stack.length ? stack.map(item => String(item)).join(', ') : '—'}`
+    `${t['generator-label-stack']} ${stack.length ? stack.map(item => String(item)).join(', ') : '—'}`
   ];
 
-  if (monetization) lines.push('', `Монетизация: ${monetization}`);
-  if (audience) lines.push(`Аудитория: ${audience}`);
+  if (monetization) lines.push('', `${t['generator-label-monetization']} ${monetization}`);
+  if (audience) lines.push(`${t['generator-label-audience']} ${audience}`);
 
   return lines.join('\n');
+}
+
+function isLocalGeneratorMockEnabled() {
+  const host = String(window.location.hostname || '').toLowerCase();
+  return host === 'localhost' || host === '127.0.0.1';
+}
+
+function buildLocalGeneratorMock(niche) {
+  const cleaned = niche.trim();
+  return {
+    name: `NichePilot: ${cleaned}`,
+    tagline: `AI co-pilot for ${cleaned} teams with fast MVP validation.`,
+    mvp_features: [
+      'Lead capture landing with instant value proposition',
+      'Auto-generated onboarding flow for first-time users',
+      'Simple analytics dashboard (activation + retention)'
+    ],
+    tech_stack: ['Next.js', 'Node.js', 'PostgreSQL', 'Tailwind CSS'],
+    monetization: 'Freemium + Pro subscription ($19/mo)',
+    target_audience: `${cleaned} founders and small product teams`
+  };
 }
 
 if (!isGeneratorSoon && generatorForm && generatorInput && generatorRunBtn && generatorEcho && generatorOutput) {
@@ -1163,22 +1230,29 @@ if (!isGeneratorSoon && generatorForm && generatorInput && generatorRunBtn && ge
     }
     generatorRenderToken += 1;
     setGeneratorLoading(true);
-    generatorOutput.textContent = '// Генерирую...';
+    generatorOutput.textContent = LANG[currentLang]['generator-loading'];
     const btnCopy = document.getElementById('btn-copy');
     const cta = document.getElementById('generator-cta');
     if (btnCopy) btnCopy.style.display = 'none';
     if (cta) cta.style.display = 'none';
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ niche, mode: 'brief' })
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.error || `HTTP ${response.status}`);
-      if (!data || typeof data !== 'object') throw new Error('Пустой ответ');
+      let data;
+      if (isLocalGeneratorMockEnabled()) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        data = buildLocalGeneratorMock(niche);
+      } else {
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ niche, mode: 'brief', lang: currentLang })
+        });
+        data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data?.error || `HTTP ${response.status}`);
+      }
+      if (!data || typeof data !== 'object') throw new Error(LANG[currentLang]['generator-empty-response']);
       UI_STATE.generatorState = 'done';
-      await typeGeneratorResult(formatIdeaResult(data));
+      const formattedOutput = formatIdeaResult(data);
+      await typeGeneratorResult(formattedOutput);
 
       const btnCopy = document.getElementById('btn-copy');
       if (btnCopy) btnCopy.style.display = 'flex';
@@ -1187,13 +1261,17 @@ if (!isGeneratorSoon && generatorForm && generatorInput && generatorRunBtn && ge
       const btnCta = document.getElementById('btn-cta');
       if (cta && btnCta) {
         cta.style.display = 'flex';
-        const ideaName = data?.name || 'идея из генератора';
+        const ideaName = data?.name || LANG[currentLang]['generator-fallback-name'];
         const ideaTagline = data?.tagline || '';
-        const tgMessage = encodeURIComponent(
-          `Привет! Сгенерировал идею через твой генератор:\n\n` +
-          `Проект: ${ideaName}\n` +
+        const messageBody =
+          `${LANG[currentLang]['generator-telegram-intro']}\n\n` +
+          `${LANG[currentLang]['generator-telegram-project']} ${ideaName}\n` +
           `${ideaTagline}\n\n` +
-          `Хочу обсудить реализацию.`
+          `${LANG[currentLang]['generator-telegram-discuss']}\n\n` +
+          `${LANG[currentLang]['generator-telegram-output']}\n` +
+          `${formattedOutput}`;
+        const tgMessage = encodeURIComponent(
+          messageBody
         );
         btnCta.href = `https://t.me/lolyousee?text=${tgMessage}`;
       }
@@ -1231,15 +1309,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const icon = btnCopy.querySelector('.copy-icon');
-    const label = btnCopy.querySelector('.copy-text');
     btnCopy.classList.add('copied');
     if (icon) icon.textContent = '✓';
-    if (label) label.textContent = 'COPIED';
+    syncGeneratorCopyLabel();
 
     setTimeout(() => {
       btnCopy.classList.remove('copied');
       if (icon) icon.textContent = '';
-      if (label) label.textContent = 'COPY';
+      syncGeneratorCopyLabel();
     }, 2000);
   });
 });

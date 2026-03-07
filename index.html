@@ -220,16 +220,26 @@ setTimeout(() => {
   <div class="projects-grid" id="projectsGrid"></div>
 </section>
 
-<section class="generator" id="generator">
+<section class="generator is-soon" id="generator" aria-disabled="true">
   <div class="reveal">
     <p class="section-label" data-i18n="generator-label">005 - AI Tool</p>
     <h2 class="section-title" data-i18n="generator-title">ПРИДУМАЙ ПРОЕКТ</h2>
   </div>
-  <div class="generator-terminal reveal">
+  <div class="generator-terminal reveal" aria-disabled="true">
     <div class="generator-bar">
       <div class="generator-dots" aria-hidden="true"><span class="generator-dot dot-red"></span><span class="generator-dot dot-yellow"></span><span class="generator-dot dot-green"></span></div>
       <span class="generator-bar-title">idea-generator.sh - lolyousee@portfolio</span>
-      <span class="generator-badge" data-i18n="generator-badge">[OPENAI]</span>
+      <span class="generator-badge" data-i18n="generator-badge">[CLAUDE]</span>
+    </div>
+    <div class="generator-soon-ribbon" aria-hidden="true">
+      <div class="generator-soon-marquee">
+        <div class="generator-soon-track">
+          <span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span>
+        </div>
+        <div class="generator-soon-track" aria-hidden="true">
+          <span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span><span>SOON</span>
+        </div>
+      </div>
     </div>
     <div class="generator-shell">
       <div class="generator-presets" id="generatorPresets"></div>
@@ -237,12 +247,8 @@ setTimeout(() => {
       <form class="generator-form" id="generatorForm">
         <div class="generator-field-head"><span data-i18n="generator-input-label">input</span></div>
         <div class="generator-input-row">
-          <input id="generatorInput" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="generator-input-placeholder" placeholder="ниша, идея, проблема...">
-          <select id="generatorTone" aria-label="Tone">
-            <option value="brief" data-i18n="generator-tone-brief">Brief</option>
-            <option value="detailed" data-i18n="generator-tone-detailed">Detailed</option>
-          </select>
-          <button id="generatorRunBtn" type="submit"><span data-i18n="generator-run">RUN -></span></button>
+          <input id="generatorInput" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="generator-input-placeholder" placeholder="ниша, идея, проблема..." disabled aria-disabled="true">
+          <button id="generatorRunBtn" type="submit" disabled aria-disabled="true"><span data-i18n="generator-run">RUN -></span></button>
         </div>
       </form>
       <div class="generator-output-wrap">

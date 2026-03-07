@@ -14,6 +14,10 @@ const UI_STATE = {
   isAfterHero: false,
   generatorState: 'idle'
 };
+// Generator mode switch:
+// - 'inactive' => keeps #generator visible but disabled with SOON ribbon
+// - 'active'   => enables full generator behavior
+const GENERATOR_MODE = 'active';
 const CONTENT = { projects: [], faq: [], signals: [], skills: [] };
 document.documentElement.dataset.motion = initialMotionMode;
 const canUseCustomCursor = hasFinePointer && hasHover && initialMotionMode === 'full';
@@ -21,7 +25,7 @@ const shouldUseHeavyHeroEffects = initialMotionMode === 'full';
 
 const LANG = {
   ru: {
-    'hero-tag':         'Vibe Coder — Портфолио',
+    'hero-tag':         'Портфолио',
     'hero-sub':         'Специализируюсь на вайбкодинге и создаю проекты\n«под ключ» — от концепции до запуска.\nДумаю как предприниматель, собираю как архитектор, реализую как инженер.',
     'btn-projects':     'Смотреть проекты',
     'btn-contact':      'Связаться',
@@ -102,7 +106,7 @@ const LANG = {
     'contact-tagline':  'Есть идея, проект или задача? Напишите — разберём концепцию, выберем стек, запустим.',
     'generator-label':  '005 - AI Tool',
     'generator-title':  'ПРИДУМАЙ ПРОЕКТ',
-    'generator-badge':  '[OPENAI]',
+    'generator-badge':  '[CLAUDE]',
     'generator-input-label': 'input',
     'generator-output-label': 'output',
     'generator-input-placeholder': 'ниша, идея, проблема...',
@@ -218,7 +222,7 @@ const LANG = {
     'contact-tagline':  'Have an idea, project or task? Write me — we\'ll break down the concept, pick the stack, launch it.',
     'generator-label':  '005 - AI Tool',
     'generator-title':  'IDEA GENERATOR',
-    'generator-badge':  '[OPENAI]',
+    'generator-badge':  '[CLAUDE]',
     'generator-input-label': 'input',
     'generator-output-label': 'output',
     'generator-input-placeholder': 'niche, idea, problem...',
@@ -934,12 +938,14 @@ document.addEventListener('keydown', event => {
 });
 
 const generatorForm = document.getElementById('generatorForm');
+const generatorSection = document.getElementById('generator');
+const generatorTerminal = document.querySelector('#generator .generator-terminal');
 const generatorInput = document.getElementById('generatorInput');
-const generatorTone = document.getElementById('generatorTone');
 const generatorRunBtn = document.getElementById('generatorRunBtn');
 const generatorEcho = document.getElementById('generatorEcho');
 const generatorOutput = document.getElementById('generatorOutput');
 const generatorPresets = document.getElementById('generatorPresets');
+const isGeneratorSoon = Boolean(generatorSection) && GENERATOR_MODE === 'inactive';
 let generatorRenderToken = 0;
 
 function generatorKeywords(lang) {
@@ -964,6 +970,10 @@ function formatGeneratorLine(rawLine, lang) {
 
 function renderGeneratorPresets() {
   if (!generatorPresets) return;
+  if (isGeneratorSoon) {
+    generatorPresets.innerHTML = '';
+    return;
+  }
   const presets = LANG[currentLang]['generator-presets'];
   generatorPresets.innerHTML = presets
     .map(item => `<button type="button" class="preset-btn" data-preset="${escapeHtml(item)}">${escapeHtml(item)}</button>`)
@@ -976,6 +986,24 @@ function renderGeneratorPresets() {
       generatorInput.focus();
     });
   });
+}
+
+if (generatorSection) {
+  generatorSection.classList.toggle('is-soon', isGeneratorSoon);
+  generatorSection.setAttribute('aria-disabled', isGeneratorSoon ? 'true' : 'false');
+}
+if (generatorTerminal) {
+  generatorTerminal.setAttribute('aria-disabled', isGeneratorSoon ? 'true' : 'false');
+}
+[generatorInput, generatorRunBtn].forEach(el => {
+  if (!el) return;
+  el.disabled = isGeneratorSoon;
+  el.setAttribute('aria-disabled', isGeneratorSoon ? 'true' : 'false');
+  if (!isGeneratorSoon) el.removeAttribute('disabled');
+});
+
+if (isGeneratorSoon && generatorOutput) {
+  setGeneratorOutputPlaceholder();
 }
 
 function setGeneratorOutputPlaceholder() {
@@ -1022,18 +1050,40 @@ async function typeGeneratorResult(text) {
 
 function showGeneratorError(message) {
   if (!generatorOutput) return;
-  const prefix = LANG[currentLang]['generator-error-prefix'];
-  generatorOutput.innerHTML = `<span class="generator-error">${escapeHtml(`${prefix} ${message}`)}</span>`;
+  generatorOutput.innerHTML = `<span class="generator-error">${escapeHtml(`// Ошибка: ${message}`)}</span>`;
 }
 
-if (generatorForm && generatorInput && generatorRunBtn && generatorEcho && generatorOutput) {
+function formatIdeaResult(data) {
+  const name = typeof data?.name === 'string' ? data.name.trim() : '';
+  const tagline = typeof data?.tagline === 'string' ? data.tagline.trim() : '';
+  const mvp = Array.isArray(data?.mvp_features) ? data.mvp_features.filter(Boolean) : [];
+  const stack = Array.isArray(data?.tech_stack) ? data.tech_stack.filter(Boolean) : [];
+  const monetization = typeof data?.monetization === 'string' ? data.monetization.trim() : '';
+  const audience = typeof data?.target_audience === 'string' ? data.target_audience.trim() : '';
+
+  const lines = [
+    `// Название: ${name || '—'}`,
+    `// Идея: ${tagline || '—'}`,
+    '',
+    'MVP фичи:',
+    ...(mvp.length ? mvp.map(item => `  → ${String(item)}`) : ['  → —']),
+    '',
+    `Стек: ${stack.length ? stack.map(item => String(item)).join(', ') : '—'}`
+  ];
+
+  if (monetization) lines.push('', `Монетизация: ${monetization}`);
+  if (audience) lines.push(`Аудитория: ${audience}`);
+
+  return lines.join('\n');
+}
+
+if (!isGeneratorSoon && generatorForm && generatorInput && generatorRunBtn && generatorEcho && generatorOutput) {
   syncGeneratorLanguage();
   generatorInput.addEventListener('input', syncGeneratorEcho);
   generatorForm.addEventListener('submit', async event => {
     event.preventDefault();
     if (UI_STATE.generatorState === 'loading') return;
     const niche = generatorInput.value.trim();
-    const tone = generatorTone?.value === 'detailed' ? 'detailed' : 'brief';
     if (!niche || niche.length > 200) {
       UI_STATE.generatorState = 'error';
       showGeneratorError('niche must be 1-200 chars');
@@ -1041,19 +1091,18 @@ if (generatorForm && generatorInput && generatorRunBtn && generatorEcho && gener
     }
     generatorRenderToken += 1;
     setGeneratorLoading(true);
-    generatorOutput.innerHTML = '<span class="generator-loading blink">█</span>';
+    generatorOutput.textContent = '// Генерирую...';
     try {
-      const response = await fetch('/api/generate-idea', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ niche, lang: currentLang, tone })
+        body: JSON.stringify({ niche, mode: 'brief' })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data?.error || `HTTP ${response.status}`);
-      const result = typeof data?.result === 'string' ? data.result.trim() : '';
-      if (!result) throw new Error('Empty result');
+      if (!data || typeof data !== 'object') throw new Error('Пустой ответ');
       UI_STATE.generatorState = 'done';
-      await typeGeneratorResult(result);
+      await typeGeneratorResult(formatIdeaResult(data));
     } catch (error) {
       UI_STATE.generatorState = 'error';
       showGeneratorError(error instanceof Error ? error.message : 'Request failed');
